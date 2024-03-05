@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  nw-restapi:
+    image: my-django-4.2
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    restart: unless-stopped

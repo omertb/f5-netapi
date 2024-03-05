@@ -1,0 +1,27 @@
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cacheClear">
+    Clear Cache
+</button>
+<!-- Modal -->
+<div class="modal fade" id="cacheClear" tabindex="-1" role="dialog" aria-labelledby="cacheClearLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cacheClearLabel">Clear Cache</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+      <div class="modal-body text-center" style="color:red;">
+        All cache objects will be deleted!<br>
+          <b style="color:black;">Are you sure?</b>
+          <div id="clearCacheResult" style="color:darkblue;text-align: left"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="clearCacheModalClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="clearCacheButton" type="button" class="btn btn-danger">Clear</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+__pycache__
+*.log
+*.config
+*.sqlite
+*.sqlite3
+media
+migrations
+static/images

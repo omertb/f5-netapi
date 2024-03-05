@@ -1,0 +1,57 @@
+{% extends '_base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+{% include '_navbar.html' %}
+
+
+
+<div class="container">
+<!-- to show entries as card add below: data-show-toggle="true"-->
+    <div class="row">
+        
+    </div>
+    <div class="row">
+        <div id="cacheStatsTableToolbar" class="mt-2">
+            <button id="getCacheStatsButton" type="button" class="btn btn-outline-success btn-sm">
+                Get Cache Stats
+            </button>
+            {% include '_modals.html' %}
+        </div>
+        <table
+            id="cacheStatsTable"
+            class="table table-hover table-sm table-responsive table-striped"
+            data-search="true"
+            data-toolbar="#cacheStatsTableToolbar"
+            data-pagination="true"
+            data-single-select="true"
+            data-click-to-select="true"
+            data-show-columns="true"
+            data-page-list="[10, 25, 50, 100, ALL]"
+            data-show-fullscreen="true"
+            data-show-export="true"
+        >
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col" data-field="state" data-checkbox="true" data-width="1" data-width-unit="%"></th>
+                <!--<th data-field="id" data-width="2" data-visible="false" data-width-unit="%">Num</th>-->
+                <th scope="col" data-field="cache_count" data-sortable="true" data-width="12" data-width-unit="%">Cache Count</th>
+                <th scope="col" data-field="cache_hits" data-sortable="true" data-width="8" data-width-unit="%">Cache Hits</th>
+                <th scope="col" data-field="cache_hit_bytes" data-sortable="true" data-width="8" data-width-unit="%">Cache Hit Bytes</th>
+                <th scope="col" data-field="cache_misses" data-visible="true" data-width="7" data-width-unit="%">Cache Misses</th>
+                <th scope="col" data-field="cache_miss_bytes" data-visible="true" data-width="6" data-width-unit="%">Cache Miss Bytes</th>
+                <th scope="col" data-field="cache_size" data-width="10" data-width-unit="%">Cache Size</th>
+            </tr>
+            </thead>
+            <tbody id="cacheStatsTableBody"></tbody>
+        </table>
+
+    </div>
+
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/scripts.js' %}"></script>
+
+{% endblock %}

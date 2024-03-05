@@ -1,0 +1,239 @@
+{% extends '_base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+{% include '_navbar.html' %}
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-6">
+            <form id="createVSForm" method="POST">
+                {% csrf_token %}
+                <div class="mb-4">
+                  <input type="text" class="form-control form-control-sm w-50" name="vsName" id="vsName" placeholder="Virtual Server Name" aria-describedby="vsHelp">
+                  <!--<label for="vsName">Virtual Server Name</label>
+                  <div id="vsHelp" class="form-text">example.yapikredi.com.tr</div>-->
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input type="text" class="form-control w-50" name="sslProfile" id="searchContent" list="searchDatalistOptions" placeholder="Value">
+                    <label id="searchContentLabel" for="searchContent">Client SSL Profile</label>
+                    <datalist id="searchDatalistOptions"></datalist>
+                </div>
+
+                <div class="mb-2">
+                    <label for="vsIpAddr" class="form-label" style="font-size: 12px;">Virtual Server IP Address:</label>
+                    <input type="text" class="form-control form-control-sm w-50" name="vsIpAddr" id="vsIpAddr" placeholder="Virtual Server IP Address"> 
+                </div>
+
+                <div class="mb-2">
+                    <label for="wafSvcIpAddr" class="form-label" style="font-size: 12px;">WAF Service IP Address:</label>
+                    <input type="text" class="form-control form-control-sm w-50" name="wafSvcIpAddr" id="wafSvcIpAddr" placeholder="WAF Service IP Address">
+                </div>
+
+                <div class="mb-4">
+                    <label for="wafRetIpAddr" class="form-label" style="font-size: 12px;">WAF Return IP Address:</label>
+                    <input type="text" class="form-control form-control-sm w-50" name="wafRetIpAddr" id="wafRetIpAddr" placeholder="WAF Return IP Address">
+                </div>
+
+                <!--Services Start -->
+
+                <div class="row">
+                    <div class="col-md-12">
+                      <p class="h6">Service Count: <span id="serviceCountDisplay"></span></p>
+                      <input type="range" class="form-range w-50" id="serviceCountSlide" name="scount" step="1" min="1" max="5" value="1" onchange="displayServices(this.value)">
+                    </div>
+                  </div>
+  
+                  <div id="serviceBlock1" style="display:block;">
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 1 IP Address" maxlength="15">
+                      </div>
+          
+                    </div>
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 1 Port" maxlength="15">
+                      </div>
+          
+                    </div>
+                  </div>
+                 
+                  <div id="serviceBlock2" style="display:none;">
+
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 2 IP Address" maxlength="15">
+                      </div>
+          
+                    </div>
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 2 Port" maxlength="15">
+                      </div>
+          
+                    </div>
+                
+                  </div>
+                  <div id="serviceBlock3" style="display:none;">
+
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 3 IP Address" maxlength="15">
+                      </div>
+          
+                    </div>
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 3 Port" maxlength="15">
+                      </div>
+          
+                    </div>
+                   
+                  </div>
+                  <div id="serviceBlock4" style="display:none;">
+
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 4 IP Address" maxlength="15">
+                      </div>
+          
+                    </div>
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 4 Port" maxlength="15">
+                      </div>
+          
+                    </div>
+                   
+                  </div>
+                  <div id="serviceBlock5" style="display:none;">
+
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 5 IP Address" maxlength="15">
+                      </div>
+          
+                    </div>
+                    <div class="row">
+                      
+                      <div class="col-md-12">
+                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 5 Port" maxlength="15">
+                      </div>
+          
+                    </div>
+                  </div>
+                  <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label for="persistenceSelect" class="form-label" style="font-size: 12px;">Persistence:</label>
+                        <select class="form-select form-select-sm" name="persistenceSelect" id="persistenceSelect" aria-label="Select Persistence">
+                            <option value="none" selected>None</option>
+                            <option value="source_addr">Source Address</option>
+                            <option value="cookie">Cookie</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lbMethodSelect" class="form-label" style="font-size: 12px;">LB Method:</label>
+                        <select class="form-select form-select-sm" name="lbMethodSelect" id="lbMethodSelect" aria-label="Select Load Balancing Method">
+                            <option value="round-robin" selected>Round Robin</option>
+                            <option value="least-connections-member">Least Connections</option>
+                            <option value="fastest-app-response">Least Response Time</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6"></div>
+                  </div>
+                  
+                <button type="submit" id="createVSBtn" class="btn btn-primary w-50">Submit</button>
+            </form>
+        </div>
+        <div class="col-6">
+            <div id="successDiv">
+                {% if success %}
+			        {% for msg in success %}
+			        <div class="alert alert-success alert-dismissable">
+				        {{ msg }}
+			        </div>
+			        {% endfor %}
+		        {% endif %}
+            </div>
+            <div id="errorDiv">
+                {% if errors %}
+			        {% for error in errors %}
+			        <div class="alert alert-danger alert-dismissable">
+				        {{ error }}
+			        </div>
+			        {% endfor %}
+		        {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script>
+    function displayServices(answer) {
+
+        document.getElementById('serviceBlock1').style.display = "none";
+        document.getElementById('serviceBlock2').style.display = "none";
+        document.getElementById('serviceBlock3').style.display = "none";
+        document.getElementById('serviceBlock4').style.display = "none";
+        document.getElementById('serviceBlock5').style.display = "none";
+
+        if (answer == 1) { // hide the div that is not selected
+
+          document.getElementById('serviceBlock1').style.display = "block";
+
+        } else if (answer == 2) { // hide the div that is not selected
+
+          document.getElementById('serviceBlock1').style.display = "block";
+          document.getElementById('serviceBlock2').style.display = "block";
+
+        } else if (answer == 3) { // hide the div that is not selected
+
+          document.getElementById('serviceBlock1').style.display = "block";
+          document.getElementById('serviceBlock2').style.display = "block";
+          document.getElementById('serviceBlock3').style.display = "block";
+
+        } else if (answer == 4) { // hide the div that is not selected
+
+          document.getElementById('serviceBlock1').style.display = "block";
+          document.getElementById('serviceBlock2').style.display = "block";
+          document.getElementById('serviceBlock3').style.display = "block";
+          document.getElementById('serviceBlock4').style.display = "block";
+
+        } else if (answer == 5) { // hide the div that is not selected
+
+          document.getElementById('serviceBlock1').style.display = "block";
+          document.getElementById('serviceBlock2').style.display = "block";
+          document.getElementById('serviceBlock3').style.display = "block";
+          document.getElementById('serviceBlock4').style.display = "block";
+          document.getElementById('serviceBlock5').style.display = "block";
+
+        }
+      }
+    // change value on slider
+    let serviceCountSlide = document.getElementById("serviceCountSlide");
+    let serviceCountDisplay = document.getElementById("serviceCountDisplay");
+    serviceCountDisplay.innerHTML = serviceCountSlide.value;
+    serviceCountSlide.oninput = function() {
+        serviceCountDisplay.innerHTML = this.value;
+    }
+
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/scripts.js' %}"></script>
+
+{% endblock %}
