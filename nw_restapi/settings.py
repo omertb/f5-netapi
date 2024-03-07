@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import ldap
 from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+import configparser
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -148,9 +149,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Ldap Login
 config = configparser.ConfigParser()
 config.read(COMMON_CONFIG_FILE)
-LDAP_HOST = config.get('ldap', 'host')
-SEARCH_DN = config.get('ldap', 'search_dn')
-GROUP_DN = config.get('ldap', 'group_dn')
+LDAP_HOST = config.get('LDAP', 'host')
+SEARCH_DN = config.get('LDAP', 'search_dn')
+GROUP_DN = config.get('LDAP', 'group_dn')
 
 
 AUTHENTICATION_BACKENDS = (
@@ -163,8 +164,8 @@ AUTH_LDAP_CONNECTION_OPTIONS = {
     ldap.OPT_REFERRALS: 0,
 }
 AUTH_LDAP_SERVER_URI = f'ldap://{LDAP_HOST}:389'
-AUTH_LDAP_BIND_DN = config.get('ldap', 'bind_dn')
-AUTH_LDAP_BIND_PASSWORD = config.get('ldap', 'bind_pass')
+AUTH_LDAP_BIND_DN = config.get('LDAP', 'bind_dn')
+AUTH_LDAP_BIND_PASSWORD = config.get('LDAP', 'bind_pass')
 AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
     LDAPSearch(SEARCH_DN, ldap.SCOPE_SUBTREE, f"(&(uid=%(user)s)(memberOf={GROUP_DN},o=BU))")
 )

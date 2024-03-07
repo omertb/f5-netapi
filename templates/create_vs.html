@@ -9,34 +9,66 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-6">
+        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8 col-12 bg-info py-2 text-dark bg-opacity-10">
             <form id="createVSForm" method="POST">
                 {% csrf_token %}
-                <div class="mb-4">
-                  <input type="text" class="form-control form-control-sm w-50" name="vsName" id="vsName" placeholder="Virtual Server Name" aria-describedby="vsHelp">
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm" name="vsName" id="vsName" placeholder="Virtual Server Name" required>
                   <!--<label for="vsName">Virtual Server Name</label>
                   <div id="vsHelp" class="form-text">example.yapikredi.com.tr</div>-->
                 </div>
 
-                <div class="form-floating mb-4">
-                    <input type="text" class="form-control w-50" name="sslProfile" id="searchContent" list="searchDatalistOptions" placeholder="Value">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="vServerConfigSelect" class="form-label" style="font-size: 12px;">VServer Config Type:</label>
+                        <select class="form-select form-select-sm" name="vServerConfigSelect" id="vServerConfigSelect" aria-label="Select VServer Protocol" onchange="displayVSFields(this.value)">
+                            <option value="waf" selected>WAF</option>
+                            <option value="http">HTTP</option>
+                            <option value="ssl">SSL</option>
+                            <option value="tcp">TCP</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="vsPort" class="form-label" style="font-size: 12px;">Virtual Server Port:</label>
+                        <input type="text" class="form-control form-control-sm" name="vsPort" id="vsPort" placeholder="Virtual Server Port">
+                    </div>
+                </div>
+
+                <div id="sslProfileDiv" class="form-floating mb-4">
+                    <input type="text" class="form-control" name="sslProfile" id="searchContent" list="searchDatalistOptions" placeholder="Value">
                     <label id="searchContentLabel" for="searchContent">Client SSL Profile</label>
                     <datalist id="searchDatalistOptions"></datalist>
                 </div>
 
                 <div class="mb-2">
                     <label for="vsIpAddr" class="form-label" style="font-size: 12px;">Virtual Server IP Address:</label>
-                    <input type="text" class="form-control form-control-sm w-50" name="vsIpAddr" id="vsIpAddr" placeholder="Virtual Server IP Address"> 
+                    <input type="text" class="form-control form-control-sm" name="vsIpAddr" id="vsIpAddr" placeholder="Virtual Server IP Address" required> 
                 </div>
 
-                <div class="mb-2">
+                <div id="wafSvcIpDiv" class="mb-2">
                     <label for="wafSvcIpAddr" class="form-label" style="font-size: 12px;">WAF Service IP Address:</label>
-                    <input type="text" class="form-control form-control-sm w-50" name="wafSvcIpAddr" id="wafSvcIpAddr" placeholder="WAF Service IP Address">
+                    <input type="text" class="form-control form-control-sm" name="wafSvcIpAddr" id="wafSvcIpAddr" placeholder="WAF Service IP Address">
                 </div>
 
-                <div class="mb-4">
+                <div id="wafRetIpDiv">
                     <label for="wafRetIpAddr" class="form-label" style="font-size: 12px;">WAF Return IP Address:</label>
-                    <input type="text" class="form-control form-control-sm w-50" name="wafRetIpAddr" id="wafRetIpAddr" placeholder="WAF Return IP Address">
+                    <input type="text" class="form-control form-control-sm" name="wafRetIpAddr" id="wafRetIpAddr" placeholder="WAF Return IP Address">
+                </div>
+
+                <div class="card bg-info text-dark bg-opacity-25 mt-4">
+                    <div class="card-body">
+
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="serviceProtoSelect" class="form-label" style="font-size: 12px;">Backend Service Protocol:</label>
+                        <select class="form-select form-select-sm" name="serviceProtoSelect" id="serviceProtoSelect" aria-label="Select Backend Service Protocol">
+                            <option value="http" selected>HTTP</option>
+                            <option value="ssl">SSL</option>
+                            <option value="tcp">TCP</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6"></div>
                 </div>
 
                 <!--Services Start -->
@@ -44,7 +76,7 @@
                 <div class="row">
                     <div class="col-md-12">
                       <p class="h6">Service Count: <span id="serviceCountDisplay"></span></p>
-                      <input type="range" class="form-range w-50" id="serviceCountSlide" name="scount" step="1" min="1" max="5" value="1" onchange="displayServices(this.value)">
+                      <input type="range" class="form-range" id="serviceCountSlide" name="scount" step="1" min="1" max="5" value="1" onchange="displayServices(this.value)">
                     </div>
                   </div>
   
@@ -52,14 +84,14 @@
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 1 IP Address" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-1" name="serv_ip[]" placeholder="Service 1 IP Address" maxlength="15">
                       </div>
           
                     </div>
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 1 Port" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-3" name="serv_port[]" placeholder="Service 1 Port" maxlength="15">
                       </div>
           
                     </div>
@@ -70,14 +102,14 @@
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 2 IP Address" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-1" name="serv_ip[]" placeholder="Service 2 IP Address" maxlength="15">
                       </div>
           
                     </div>
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 2 Port" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-3" name="serv_port[]" placeholder="Service 2 Port" maxlength="15">
                       </div>
           
                     </div>
@@ -88,14 +120,14 @@
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 3 IP Address" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-1" name="serv_ip[]" placeholder="Service 3 IP Address" maxlength="15">
                       </div>
           
                     </div>
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 3 Port" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-3" name="serv_port[]" placeholder="Service 3 Port" maxlength="15">
                       </div>
           
                     </div>
@@ -106,14 +138,14 @@
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 4 IP Address" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-1" name="serv_ip[]" placeholder="Service 4 IP Address" maxlength="15">
                       </div>
           
                     </div>
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 4 Port" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-3" name="serv_port[]" placeholder="Service 4 Port" maxlength="15">
                       </div>
           
                     </div>
@@ -124,20 +156,22 @@
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-1" name="serv_ip[]" placeholder="Service 5 IP Address" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-1" name="serv_ip[]" placeholder="Service 5 IP Address" maxlength="15">
                       </div>
           
                     </div>
                     <div class="row">
                       
                       <div class="col-md-12">
-                        <input type="text" class="form-control form-control-sm w-50 mb-3" name="serv_port[]" placeholder="Service 5 Port" maxlength="15">
+                        <input type="text" class="form-control form-control-sm mb-3" name="serv_port[]" placeholder="Service 5 Port" maxlength="15">
                       </div>
           
                     </div>
                   </div>
+                </div>
+            </div>
                   <div class="row mb-4">
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label for="persistenceSelect" class="form-label" style="font-size: 12px;">Persistence:</label>
                         <select class="form-select form-select-sm" name="persistenceSelect" id="persistenceSelect" aria-label="Select Persistence">
                             <option value="none" selected>None</option>
@@ -145,7 +179,7 @@
                             <option value="cookie">Cookie</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label for="lbMethodSelect" class="form-label" style="font-size: 12px;">LB Method:</label>
                         <select class="form-select form-select-sm" name="lbMethodSelect" id="lbMethodSelect" aria-label="Select Load Balancing Method">
                             <option value="round-robin" selected>Round Robin</option>
@@ -153,13 +187,14 @@
                             <option value="fastest-app-response">Least Response Time</option>
                         </select>
                     </div>
-                    <div class="col-md-6"></div>
                   </div>
-                  
-                <button type="submit" id="createVSBtn" class="btn btn-primary w-50">Submit</button>
+                <div class="row mb-4 px-2">
+                <button type="submit" id="createVSBtn" class="btn btn-primary">Submit</button>
+                </div>
             </form>
+
         </div>
-        <div class="col-6">
+        <div class="col-xl-9 col-lg-8 col-md-6 col-sm-4 col-12 ">
             <div id="successDiv">
                 {% if success %}
 			        {% for msg in success %}
@@ -184,6 +219,27 @@
 
 </div>
 <script>
+    function displayVSFields(answer) {
+
+        if (answer == "ssl") { 
+
+            $('#sslProfileDiv').slideDown();
+            $('#wafSvcIpDiv').slideUp();
+            $('#wafRetIpDiv').slideUp();
+
+        } else if (answer == "waf") { 
+
+            $('#sslProfileDiv').slideDown();
+            $('#wafSvcIpDiv').slideDown();
+            $('#wafRetIpDiv').slideDown();
+
+        } else if  (answer == "http" || answer == "tcp") {
+            $('#sslProfileDiv').slideUp();
+            $('#wafSvcIpDiv').slideUp();
+            $('#wafRetIpDiv').slideUp();
+        }
+    }
+
     function displayServices(answer) {
 
         document.getElementById('serviceBlock1').style.display = "none";
