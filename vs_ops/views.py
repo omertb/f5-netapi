@@ -2,11 +2,14 @@ from django.shortcuts import render
 import json
 from lib.f5_api_reqs import f5_custom_create_vs, f5_custom_create_pool
 import re
+import time
 
 # Create your views here.
 
 def vs_page(request):
     if request.method == "POST":
+        time.sleep(3)
+        return render(request, 'create_vs.html', {'success': ["TESTING!!!!"]})
         ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
         ValidPortRegex = "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         errors = []
@@ -128,8 +131,6 @@ def vs_page(request):
                     errors.append(f"Failed to create VS {waf_ret_vs_name}; Response Code: {response.status_code}, {response.text}")
             else:
                 errors.append(f"Unknown error for creating VS {waf_ret_vs_name}")
-            
-            return render(request, 'create_vs.html', {'errors': errors, 'success': success})
         
         # create a http virtual server to redirect to https
         if redirect_https == "yes":
@@ -215,6 +216,7 @@ def vs_page(request):
                 errors.append(f"Unknown error for creating VS {nonssl_vs_name}")
             if errors:
                 return render(request, 'create_vs.html', {'errors': errors, 'success': success})
-
+        
+        return render(request, 'create_vs.html', {'errors': errors, 'success': success})
 
     return render(request, 'create_vs.html')

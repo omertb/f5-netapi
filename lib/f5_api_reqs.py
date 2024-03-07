@@ -33,7 +33,6 @@ def f5_api_request(method, api_url, user, password, data=None):
 
 def f5_create_vs(host, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence):
     create_vs_api_url = f"https://{host}/mgmt/tm/ltm/virtual"
-    print(snat)
     payload = {
         "name": vs_name,
         "destination": vs_ip,

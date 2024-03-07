@@ -49,96 +49,70 @@ function delay(callback, ms) {
 
 
 
-    // spinner for form submit
-    $(document).ready(function() {
-        
-        let createVSForm = document.getElementById("createVSForm");
-        let createVSBtn = document.getElementById("createVSBtn");
-/*
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-              // Fetch all the forms we want to apply custom Bootstrap validation styles to
-              var forms = document.getElementsByClassName('needs-validation');
-              // Loop over them and prevent submission
+    
+$(document).ready(function() {
+    // Check if the table has any rows
+    if ($('tbody tr').length == 0) {
+        // Hide the table header and toolbar content
+        $('thead').hide();
+    }
+});
 
-              createVSForm.addEventListener('submit', function(event) {
-                    if (createVSForm.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    }
-                    createVSForm.classList.add('was-validated');
-                    $("#createVSBtn").click(function() {
-                        // disable button
-                        $(this).prop("disabled", true);
-                        // add spinner to button
-                        $(this).html(
-                            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
-                        );
-                        $("#createVSForm").submit();
-                    });
-                }, false);
 
-            }, false);
-        })();
-        */
 
-        createVSForm.addEventListener('submit', function(event) {
-            $("#createVSBtn").click(function() {
-                    if (createVSForm.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    } else {
-                        // disable button
-                        $(this).prop("disabled", true);
-                        // add spinner to button
-                        $(this).html(
-                            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
-                        );
-                        $("#createVSForm").submit();
-                    }          
-            });
+// spinner for form submit
+let createVSForm = document.getElementById("createVSForm");
+$(document).ready(function() {
+    createVSForm.addEventListener('submit', function(event) {
+        $("#createVSBtn").click(function() {
+            if (createVSForm.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // disable button
+                $(this).prop("disabled", true);
+                // add spinner to button
+                $(this).html(
+                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
+                );
+                $("#createVSForm").submit();
+            }          
         });
+    });
+});
 
-
-        // Check if the table has any rows
-        if ($('tbody tr').length == 0) {
-            // Hide the table header and toolbar content
-            $('thead').hide();
-        }
-        const searchInput = $("#searchContent");
-        const searchDatalist = $("#searchDatalistOptions");
-        let errorDiv = document.getElementById("errorDiv");
-
-        //searchInput.on("keyup", delay(function() {
-        searchInput.one("focus", delay(function() {
-            //if (searchInput.val().length == 3) {
-                // clear previous options
-                searchDatalist.empty();
-                fetch("/cert/sslprofiles.json", {
-                    method: "GET",
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        let err = new Error("SSL Profiles Could Not Be Fetched! " + response.status);
-                        err.response = response;
-                        err.status = response.status;
-                        throw err;
-                    }
-                    return response.json();
-                })
-                .then(responseJson => {
-                    responseJson.forEach(function(option) {
-                        searchDatalist.append(`<option value="${option}">`);
-                    });
-                    errorDiv.innerHTML = "";
-                    errorDiv.removeAttribute("class")
-                })
-                .catch(err => {
-                    $('#errorDiv').addClass('alert alert-danger');
-                    errorDiv.innerHTML = err.message;
+const searchInput = $("#searchContent");
+const searchDatalist = $("#searchDatalistOptions");
+let errorDiv = document.getElementById("errorDiv");
+$(document).ready(function() {
+    //searchInput.on("keyup", delay(function() {
+    searchInput.one("focus", delay(function() {
+        //if (searchInput.val().length == 3) {
+            // clear previous options
+            searchDatalist.empty();
+            fetch("/cert/sslprofiles.json", {
+                method: "GET",
+            })
+            .then(response => {
+                if (!response.ok) {
+                    let err = new Error("SSL Profiles Could Not Be Fetched! " + response.status);
+                    err.response = response;
+                    err.status = response.status;
+                    throw err;
+                }
+                return response.json();
+            })
+            .then(responseJson => {
+                responseJson.forEach(function(option) {
+                    searchDatalist.append(`<option value="${option}">`);
                 });
-            //} // endif
-        }, 250));
+                errorDiv.innerHTML = "";
+                errorDiv.removeAttribute("class")
+            })
+            .catch(err => {
+                $('#errorDiv').addClass('alert alert-danger');
+                errorDiv.innerHTML = err.message;
+            });
+        //} // endif
+    }, 250));
 });
