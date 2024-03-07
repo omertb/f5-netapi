@@ -30,17 +30,24 @@
                     </div>
                     <div class="col-md-6">
                         <label for="vsPort" class="form-label" style="font-size: 12px;">Virtual Server Port:</label>
-                        <input type="text" class="form-control form-control-sm" name="vsPort" id="vsPort" placeholder="Virtual Server Port">
+                        <input type="text" class="form-control form-control-sm" name="vsPort" id="vsPort" placeholder="Virtual Server Port" required>
                     </div>
                 </div>
 
-                <div id="sslProfileDiv" class="form-floating mb-4">
+                <div id="sslProfileDiv" class="form-floating">
                     <input type="text" class="form-control" name="sslProfile" id="searchContent" list="searchDatalistOptions" placeholder="Value">
                     <label id="searchContentLabel" for="searchContent">Client SSL Profile</label>
                     <datalist id="searchDatalistOptions"></datalist>
                 </div>
 
-                <div class="mb-2">
+                <div id="redirectHttpsCheckDiv" class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="redirectHttpsCheck" value="yes" id="redirectHttpsCheck">
+                    <label class="form-check-label" for="redirectHttpsCheck">
+                      Create HTTP to HTTPS Redirect VS
+                    </label>
+                </div>
+
+                <div class="mb-2 mt-2">
                     <label for="vsIpAddr" class="form-label" style="font-size: 12px;">Virtual Server IP Address:</label>
                     <input type="text" class="form-control form-control-sm" name="vsIpAddr" id="vsIpAddr" placeholder="Virtual Server IP Address" required> 
                 </div>
@@ -224,17 +231,20 @@
         if (answer == "ssl") { 
 
             $('#sslProfileDiv').slideDown();
+            $('#redirectHttpsCheckDiv').slideDown();
             $('#wafSvcIpDiv').slideUp();
             $('#wafRetIpDiv').slideUp();
 
         } else if (answer == "waf") { 
 
             $('#sslProfileDiv').slideDown();
+            $('#redirectHttpsCheckDiv').slideDown();
             $('#wafSvcIpDiv').slideDown();
             $('#wafRetIpDiv').slideDown();
 
         } else if  (answer == "http" || answer == "tcp") {
             $('#sslProfileDiv').slideUp();
+            $('#redirectHttpsCheckDiv').slideUp();
             $('#wafSvcIpDiv').slideUp();
             $('#wafRetIpDiv').slideUp();
         }

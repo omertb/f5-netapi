@@ -39,11 +39,11 @@ def f5_create_vs(host, vs_name, vs_ip, pool_name, profiles, irule, snat, persist
         "destination": vs_ip,
         "ipProtocol": "tcp",
         "sourceAddressTranslation": { "type": snat },
-        "profiles": profiles,
-        "rules": [
-            f"/Common/{irule}"
-        ]
+        "profiles": profiles
     }
+
+    if irule is not None:
+        payload["rules"] = [ f"/Common/{irule}" ]
 
     if pool_name is not None:
         payload["pool"] = pool_name
