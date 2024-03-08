@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-import ldap
-from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
+#import ldap
+#from django_auth_ldap.config import LDAPSearch, LDAPSearchUnion
 import configparser
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'user_ops.apps.UserOpsConfig',
     'cert_ops.apps.CertOpsConfig',
     'vs_ops.apps.VsOpsConfig',
-    'django_auth_ldap',
+#    'django_auth_ldap',
 ]
 
 MIDDLEWARE = [
@@ -155,20 +155,20 @@ GROUP_DN = config.get('LDAP', 'group_dn')
 
 
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
+#    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
-AUTH_LDAP_CONNECTION_OPTIONS = {
-    ldap.OPT_PROTOCOL_VERSION: 3,
-    ldap.OPT_REFERRALS: 0,
-}
+#AUTH_LDAP_CONNECTION_OPTIONS = {
+#    ldap.OPT_PROTOCOL_VERSION: 3,
+#    ldap.OPT_REFERRALS: 0,
+#}
 AUTH_LDAP_SERVER_URI = f'ldap://{LDAP_HOST}:389'
 AUTH_LDAP_BIND_DN = config.get('LDAP', 'bind_dn')
 AUTH_LDAP_BIND_PASSWORD = config.get('LDAP', 'bind_pass')
-AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
-    LDAPSearch(SEARCH_DN, ldap.SCOPE_SUBTREE, f"(&(uid=%(user)s)(memberOf={GROUP_DN},o=BU))")
-)
+#AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
+#    LDAPSearch(SEARCH_DN, ldap.SCOPE_SUBTREE, f"(&(uid=%(user)s)(memberOf={GROUP_DN},o=BU))")
+#)
 
 AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "cn",

@@ -47,8 +47,15 @@ function delay(callback, ms) {
     };
   }
 
-
-
+// disable button when submittin on create vs form
+$(document).ready(function() {
+    $("#createVSForm").submit(function() {
+        $(".loading-icon").removeClass("visually-hidden");
+        $("#createVSForm").attr("disabled", true);
+        $("#createVSBtn").attr("disabled", true);
+        $("#btnText").text("Submitting ...");
+    });
+});
     
 $(document).ready(function() {
     // Check if the table has any rows
@@ -58,28 +65,6 @@ $(document).ready(function() {
     }
 });
 
-
-
-// spinner for form submit
-let createVSForm = document.getElementById("createVSForm");
-$(document).ready(function() {
-    createVSForm.addEventListener('submit', function(event) {
-        $("#createVSBtn").click(function() {
-            if (createVSForm.checkValidity() === false) {
-                event.preventDefault();
-                event.stopPropagation();
-            } else {
-                // disable button
-                $(this).prop("disabled", true);
-                // add spinner to button
-                $(this).html(
-                    `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
-                );
-                $("#createVSForm").submit();
-            }          
-        });
-    });
-});
 
 const searchInput = $("#searchContent");
 const searchDatalist = $("#searchDatalistOptions");
