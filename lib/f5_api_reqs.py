@@ -128,7 +128,7 @@ def delete_custom_f5_cache():
     return f5_delete_cache(F5_HOST, F5_USER, F5_PASS)
 
 
-def f5_import_pfx_cert(host, user, passwd, filename):
+def f5_import_pfx_cert(host, user, passwd, filename, passphrase):
     F5_DOWNLOAD_ROOT = "/var/config/rest/downloads"
     upload_cert_api_url = f"https://{host}/mgmt/tm/sys/crypto/pkcs12"
     file_location = f"{F5_DOWNLOAD_ROOT}/{filename}"
@@ -137,14 +137,14 @@ def f5_import_pfx_cert(host, user, passwd, filename):
         "command": "install",
         "name": filename,
         "from-local-file": file_location,
-        "passphrase": "12345678"
+        "passphrase": passphrase
         })
     response = f5_api_request("POST", upload_cert_api_url, user, passwd, data=payload)
     return response.status_code
 
 
 def f5_custom_import_pfx_cert(filename):
-    return f5_import_pfx_cert(F5_HOST, F5_USER, F5_PASS, filename)
+    return f5_import_pfx_cert(F5_HOST, F5_USER, F5_PASS, filename, "12345678")
 
 
 def f5_file_upload(host, user, password, filename):
