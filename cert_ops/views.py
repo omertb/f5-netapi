@@ -9,6 +9,9 @@ def cert_page(request):
     if 'certfile' in request.FILES:
         if request.method == 'POST' and request.FILES['certfile']:
             certfile = request.FILES['certfile']
+            username = request.POST.get("adUser")
+            password = request.POST.get("adPass")
+            return render(request, 'cert_upload.html')
             fs = FileSystemStorage()
             filename = fs.save(certfile.name, certfile)
 

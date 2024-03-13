@@ -31,7 +31,7 @@ def f5_api_request(method, api_url, user, password, data=None):
         return None
 
 
-def f5_create_vs(host, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence):
+def f5_create_vs(host, user, passwd, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence):
     create_vs_api_url = f"https://{host}/mgmt/tm/ltm/virtual"
     payload = {
         "name": vs_name,
@@ -56,14 +56,14 @@ def f5_create_vs(host, vs_name, vs_ip, pool_name, profiles, irule, snat, persist
             }
         ]
     
-    return f5_api_request("POST", create_vs_api_url, F5_USER, F5_PASS, data=json.dumps(payload))
+    return f5_api_request("POST", create_vs_api_url, user, passwd, data=json.dumps(payload))
 
 
 def f5_custom_create_vs(vs_name, vs_ip, pool_name, profiles, irule, snat="none", persistence=None):
-    return f5_create_vs(F5_HOST, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence)
+    return f5_create_vs(F5_HOST, F5_USER, F5_PASS, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence)
 
 
-def f5_create_pool(host, pool_name, members, lb_method):
+def f5_create_pool(host, user, passwd, pool_name, members, lb_method):
     create_pool_api_url = f"https://{host}/mgmt/tm/ltm/pool"
     payload = {
             "name": pool_name,
@@ -71,20 +71,20 @@ def f5_create_pool(host, pool_name, members, lb_method):
             "members": members,
             "loadBalancingMode": lb_method
     }
-    return f5_api_request("POST", create_pool_api_url, F5_USER, F5_PASS, data=json.dumps(payload))
+    return f5_api_request("POST", create_pool_api_url, user, passwd, data=json.dumps(payload))
 
 
 def f5_custom_create_pool(pool_name, members, lb_method):
-    return f5_create_pool(F5_HOST, pool_name, members, lb_method)
+    return f5_create_pool(F5_HOST, F5_USER, F5_PASS, pool_name, members, lb_method)
 
 
-def f5_get_client_ssl_profiles(host):
+def f5_get_client_ssl_profiles(host, user, passwd):
     client_ssl_profiles_api_url = f"https://{host}/mgmt/tm/ltm/profile/client-ssl"
-    return f5_api_request("GET", client_ssl_profiles_api_url, F5_USER, F5_PASS)
+    return f5_api_request("GET", client_ssl_profiles_api_url, user, passwd)
 
 
 def f5_custom_get_client_ssl_profiles():
-    response = f5_get_client_ssl_profiles(F5_HOST)
+    response = f5_get_client_ssl_profiles(F5_HOST, F5_USER, F5_PASS)
     if response:
         if response.status_code == 200:
             result = json.loads(response.text)
@@ -96,10 +96,10 @@ def f5_custom_get_client_ssl_profiles():
         return None
 
 
-def f5_get_cache_status(host):
+def f5_get_cache_status(host, user, passwd):
     cache_profile = "~Common~webaccel_common"
     cache_status_api_url = f"https://{host}/mgmt/tm/ltm/profile/web-acceleration/{cache_profile}/stats"
-    response = f5_api_request("GET", cache_status_api_url, F5_USER, F5_PASS)
+    response = f5_api_request("GET", cache_status_api_url, user, passwd)
     if response is not None:
         if response.status_code == 200:
             result = json.loads(response.text)
@@ -112,12 +112,12 @@ def f5_get_cache_status(host):
 
 
 def get_custom_f5_stats():
-    return f5_get_cache_status(F5_HOST)
+    return f5_get_cache_status(F5_HOST, F5_USER, F5_PASS)
 
 
-def f5_delete_cache(host):
+def f5_delete_cache(host, user, passwd):
     delete_cache_api_url = f"https://{host}/mgmt/tm/ltm/profile/ramcache/all"
-    response = f5_api_request("DELETE", delete_cache_api_url, F5_USER, F5_PASS)
+    response = f5_api_request("DELETE", delete_cache_api_url, user, passwd)
     if response.status_code == 200:
         return "SUCCESS"
     else:
@@ -125,10 +125,10 @@ def f5_delete_cache(host):
 
 
 def delete_custom_f5_cache():
-    return f5_delete_cache(F5_HOST)
+    return f5_delete_cache(F5_HOST, F5_USER, F5_PASS)
 
 
-def f5_import_pfx_cert(host, filename):
+def f5_import_pfx_cert(host, user, passwd, filename):
     F5_DOWNLOAD_ROOT = "/var/config/rest/downloads"
     upload_cert_api_url = f"https://{host}/mgmt/tm/sys/crypto/pkcs12"
     file_location = f"{F5_DOWNLOAD_ROOT}/{filename}"
@@ -139,12 +139,12 @@ def f5_import_pfx_cert(host, filename):
         "from-local-file": file_location,
         "passphrase": "12345678"
         })
-    response = f5_api_request("POST", upload_cert_api_url, F5_USER, F5_PASS, data=payload)
+    response = f5_api_request("POST", upload_cert_api_url, user, passwd, data=payload)
     return response.status_code
 
 
 def f5_custom_import_pfx_cert(filename):
-    return f5_import_pfx_cert(F5_HOST, filename=filename)
+    return f5_import_pfx_cert(F5_HOST, F5_USER, F5_PASS, filename)
 
 
 def f5_file_upload(host, user, password, filename):
@@ -193,13 +193,15 @@ def f5_custom_file_upload(filename):
     return f5_file_upload(F5_HOST, F5_USER, F5_PASS, filename)
 
 
-def f5_create_ssl_profile(host, certname, keyname):
+def f5_create_ssl_profile(host, user, passwd, certname, keyname):
     payload = {}
     payload['name'] = f'{certname.replace(".pfx", "").replace(".tr", "").replace(".com", "").replace(".yapikredi", "")}_{time.strftime("%d_%m_%Y")}'
     payload['cert'] = certname
     payload['key'] = keyname
+    payload["ciphers"] = "none"
+    payload["cipherGroup"] = "/Common/yapikredi_ecdhe"
     create_ssl_profile_api_url =  f"https://{host}/mgmt/tm/ltm/profile/client-ssl"
-    response = f5_api_request("POST", create_ssl_profile_api_url, F5_USER, F5_PASS, data=json.dumps(payload))
+    response = f5_api_request("POST", create_ssl_profile_api_url, user, passwd, data=json.dumps(payload))
     if response is not None:
         return response.status_code
     else:
@@ -207,4 +209,4 @@ def f5_create_ssl_profile(host, certname, keyname):
 
 
 def f5_custom_create_ssl_profile(pfx_certname):
-    return f5_create_ssl_profile(F5_HOST, pfx_certname, pfx_certname)
+    return f5_create_ssl_profile(F5_HOST, F5_USER, F5_PASS, pfx_certname, pfx_certname)

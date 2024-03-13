@@ -33,7 +33,46 @@
                 -->
                 <div class="input-group">
                     <input type="file" class="form-control" name="certfile" id="certFile" aria-describedby="uploadCertFile" aria-label="Upload">
-                    <button class="btn btn-outline-primary" type="submit" id="uploadCertFile">Upload</button>
+                    <!--<button class="btn btn-outline-primary" type="submit" id="uploadCertFile">Upload</button>-->
+
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-primary" id="uploadCertFile" data-bs-toggle="modal" data-bs-target="#uploadCertModal">
+                      Upload
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="uploadCertModal" tabindex="-1" role="dialog" aria-labelledby="uploadCertModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="uploadCertModalLabel">Upload Certificate</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
+                          </div>
+                          <div class="modal-body text-center">
+                            Certificate will be uploaded and a client ssl profile will be created!<br>
+                            <div id="adUserDiv" class="mt-4 row">
+                              <label for="adUser" class="col-sm-4 col-form-label text-start">AD User:</label>
+                              <div class="col-sm-8">
+                                <input type="text" class="form-control form-control-sm" name="adUser" id="adUser" placeholder="Username">
+                              </div>
+                            </div>
+  
+                            <div id="adPassDiv" class="mt-2 row">
+                              <label for="adPass" class="col-sm-4 col-form-label text-start">AD Password:</label>
+                              <div class="col-sm-8">
+                                <input type="password" class="form-control form-control-sm" name="adPass" id="adPass" placeholder="Password">
+                              </div>
+                            </div>
+                              <b style="color:black;">Are you sure?</b>
+                              <div id="uploadCertResult" style="color:darkblue;text-align: left"></div>
+                          </div>
+                          <div class="modal-footer">
+                            <button id="uploadCertModalClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button id="uploadCertButton" type="submit" class="btn btn-primary">Upload Certificate</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                 </div>
                   
 
