@@ -15,8 +15,8 @@
                 <div class="row">
                     <div class="col-md-6 col-12">
 
-                        <label for="loadBalancerSelect" class="form-label">Select Load Balancer:</label>
-                        <select class="form-select mb-2" name="loadBalancerSelect" id="loadBalancerSelect" aria-label="Select Load Balancer">
+                        <label for="vsLoadBalancerSelect" class="form-label">Select Load Balancer:</label>
+                        <select class="form-select mb-2" name="vsLoadBalancerSelect" id="vsLoadBalancerSelect" aria-label="Select Load Balancer">
                             {% for lb_name, lb_addr in load_balancers.items %}
                             <option value="{{ lb_addr }}">{{ lb_name }} - {{ lb_addr }}</option>
                             {% endfor %}
@@ -218,14 +218,54 @@
                         </div>
                         <div class="row mb-4 px-2">
                   
-                            <div class="col-sm-6">
-                                
+                            <div class="col-sm-3">  
                             </div>
                             <div class="col-sm-6">
-                                <button type="submit" id="createVSBtn" class="btn btn-primary w-100">
-                                    <i class="loading-icon spinner-border spinner-border-sm visually-hidden"></i> &nbsp;
-                                    <span id="btnText">Submit</span>
+                                <button type="button" id="createVSBtnModal" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#createVSModal">
+                                    Submit
                                 </button>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="createVSModal" tabindex="-1" role="dialog" aria-labelledby="createVSModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="createVSModalLabel">Upload Certificate</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        </button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                        Pools and Virtual Servers will be created based on your inputs!<br>
+                                        <div id="adUserDiv" class="mt-4 row">
+                                            <label for="adUser" class="col-sm-4 col-form-label text-start">AD User:</label>
+                                            <div class="col-sm-8">
+                                            <input type="text" class="form-control form-control-sm" name="adUser" id="adUser" placeholder="Username">
+                                            </div>
+                                        </div>
+                
+                                        <div id="adPassDiv" class="mt-2 row">
+                                            <label for="adPass" class="col-sm-4 col-form-label text-start">AD Password:</label>
+                                            <div class="col-sm-8">
+                                            <input type="password" class="form-control form-control-sm" name="adPass" id="adPass" placeholder="Password">
+                                            </div>
+                                        </div>
+                                            <b style="color:black;">Are you sure?</b>
+                                            <div id="createVSResult" style="color:darkblue;text-align: left"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button id="createVSModalClose" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button id="createVSBtn" type="submit" class="btn btn-outline-primary">
+                                            <i class="loading-icon spinner-border spinner-border-sm visually-hidden"></i>
+                                            <span id="btnText">Create</span>
+                                        </button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                
+
+                            </div>
+                            <div class="col-sm-3">  
                             </div>
                         
                         </div>
@@ -236,23 +276,23 @@
         </div>
         <div class="col-xxl-6 col-lg-4 col-12 ">
             <div id="successDiv">
-                {% if success %}
-			        {% for msg in success %}
-			        <div class="alert alert-success alert-dismissable">
-				        {{ msg }}
-			        </div>
-			        {% endfor %}
-		        {% endif %}
             </div>
             <div id="errorDiv">
-                {% if errors %}
-			        {% for error in errors %}
-			        <div class="alert alert-danger alert-dismissable">
-				        {{ error }}
-			        </div>
-			        {% endfor %}
-		        {% endif %}
             </div>
+            {% if success %}
+                {% for msg in success %}
+                    <div class="alert alert-success alert-dismissable">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% if errors %}
+                {% for error in errors %}
+                    <div class="alert alert-danger alert-dismissable">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 
@@ -334,6 +374,6 @@
 
 </script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'js/scripts.js' %}"></script>
+<script src="{% static 'js/vs-scripts.js' %}"></script>
 
 {% endblock %}

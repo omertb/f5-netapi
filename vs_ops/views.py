@@ -38,19 +38,19 @@ def vs_page(request):
         # Validations
         if config_type == "waf":
             if not (vs_name and vs_ip and waf_svc_ip and waf_return_ip and svc_ip_list and svc_port_list and ssl_profile):
-                return render(request, 'create_vs.html', {'errors': ["All fields are required!"]})
+                return render(request, 'create_vs.html', {'errors': ["All fields are required!"], 'load_balancers': load_balancers})
             if not re.search(ValidIpAddressRegex, waf_svc_ip):
                 errors.append(f"Invalid IP Address : {waf_svc_ip}")
             if not re.search(ValidIpAddressRegex, waf_return_ip):
                 errors.append(f"Invalid IP Address : {waf_return_ip}")
         if config_type == "http" or config_type == "tcp"  or config_type == "ssl":
             if not (vs_name and vs_ip and svc_ip_list and svc_port_list):
-                return render(request, 'create_vs.html', {'errors': ["All fields are required!"]})
+                return render(request, 'create_vs.html', {'errors': ["All fields are required!"], 'load_balancers': load_balancers})
             if not re.search(ValidIpAddressRegex, vs_ip):
                 errors.append(f"Invalid IP Address : {vs_ip}")
         if config_type == "ssl":
             if not (ssl_profile):
-                return render(request, 'create_vs.html', {'errors': ["All fields are required!"]})
+                return render(request, 'create_vs.html', {'errors': ["All fields are required!"], 'load_balancers': load_balancers})
         if len(vs_name) < 4:
             errors.append(f"Too short for Virtual Server Name")
         for svc_ip in svc_ip_list:
@@ -60,7 +60,7 @@ def vs_page(request):
             if not re.search(ValidPortRegex, svc_port):
                 errors.append(f"Invalid Port Number : {svc_port}")
         if errors:
-            return render(request, 'create_vs.html', {'errors': errors})
+            return render(request, 'create_vs.html', {'errors': errors, 'load_balancers': load_balancers})
         
         """
         [
