@@ -3,10 +3,14 @@ import json
 from lib.f5_api_reqs import f5_custom_create_vs, f5_custom_create_pool
 import re
 import time
+from nw_restapi.settings import config
 
 # Create your views here.
 
 def vs_page(request):
+    load_balancers = {}
+    for lb_name, lb_addr in config['F5_LB_LIST'].items():
+        load_balancers[lb_name.upper()] = lb_addr
     if request.method == "POST":
         ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
         ValidPortRegex = "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
@@ -88,7 +92,7 @@ def vs_page(request):
         else:
             errors.append(f"Unknown error for creating pool {svc_pool_name}")
         if errors:
-            return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+            return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
 
         if config_type == "waf":
             # create WAF Service Pool
@@ -106,7 +110,7 @@ def vs_page(request):
             else:
                 errors.append(f"Unknown error for creating pool {waf_pool_name}")
             if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
             
             # waf return virtual server
             waf_ret_vs_name = f"{vs_name}_ssl_waf"
@@ -150,7 +154,7 @@ def vs_page(request):
             else:
                 errors.append(f"Unknown error for creating VS {http80_vs_name}")
             if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
         
         # create ssl virtual server
         if config_type == "waf" or config_type == "ssl":
@@ -184,7 +188,7 @@ def vs_page(request):
             else:
                 errors.append(f"Unknown error for creating VS {ssl_vs_name}")
             if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
 
         # create http or tcp virtual server with application services backend pool
         if config_type == "http" or config_type == "tcp":
@@ -213,8 +217,8 @@ def vs_page(request):
             else:
                 errors.append(f"Unknown error for creating VS {nonssl_vs_name}")
             if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
         
-        return render(request, 'create_vs.html', {'errors': errors, 'success': success})
+        return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
 
-    return render(request, 'create_vs.html')
+    return render(request, 'create_vs.html', {'load_balancers': load_balancers})

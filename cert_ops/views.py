@@ -5,6 +5,7 @@ from lib.f5_api_reqs import f5_custom_import_pfx_cert, f5_custom_file_upload, f5
 from lib.f5_api_reqs import f5_import_pfx_cert, f5_file_upload, f5_create_ssl_profile, f5_custom_get_client_ssl_profiles
 import time
 from nw_restapi.settings import config
+import json
 
 def cert_page(request):
     load_balancers = {}
@@ -56,6 +57,9 @@ def cert_page(request):
 
 
 def get_ssl_profiles(request):
-    name_list = f5_custom_get_client_ssl_profiles()
-    if name_list is not None:
-        return JsonResponse(name_list, safe=False)
+    if request.method == 'POST':
+        lb_host = request.body.decode()
+        name_list = f5_custom_get_client_ssl_profiles(lb_host)
+        if name_list is not None:
+            return JsonResponse(name_list, safe=False)
+        

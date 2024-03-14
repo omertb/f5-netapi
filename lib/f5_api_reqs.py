@@ -83,8 +83,8 @@ def f5_get_client_ssl_profiles(host, user, passwd):
     return f5_api_request("GET", client_ssl_profiles_api_url, user, passwd)
 
 
-def f5_custom_get_client_ssl_profiles():
-    response = f5_get_client_ssl_profiles(F5_HOST, F5_USER, F5_PASS)
+def f5_custom_get_client_ssl_profiles(lb_host):
+    response = f5_get_client_ssl_profiles(lb_host, F5_USER, F5_PASS)
     if response:
         if response.status_code == 200:
             result = json.loads(response.text)

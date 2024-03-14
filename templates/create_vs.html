@@ -14,10 +14,17 @@
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-md-6 col-12">
-                        <div class="mb-2">
-                            <input type="text" class="form-control form-control-sm" name="vsName" id="vsName" placeholder="Virtual Server Name" required>
-                            <!--<label for="vsName">Virtual Server Name</label>
-                            <div id="vsHelp" class="form-text">example.yapikredi.com.tr</div>-->
+
+                        <label for="loadBalancerSelect" class="form-label">Select Load Balancer:</label>
+                        <select class="form-select mb-2" name="loadBalancerSelect" id="loadBalancerSelect" aria-label="Select Load Balancer">
+                            {% for lb_name, lb_addr in load_balancers.items %}
+                            <option value="{{ lb_addr }}">{{ lb_name }} - {{ lb_addr }}</option>
+                            {% endfor %}
+                        </select>
+                        <hr>
+    
+                        <div class="mb-2 mt-1">
+                                <input type="text" class="form-control form-control-sm" name="vsName" id="vsName" placeholder="Virtual Server Name" required>
                         </div>
 
                         <div class="row mb-4">
@@ -205,15 +212,22 @@
                             </div>
                         </div>
 
+                        <div class="row">
+                            
+                            
+                        </div>
                         <div class="row mb-4 px-2">
-                            <div class="col-sm-3"></div>
+                  
                             <div class="col-sm-6">
-                                <button type="submit" id="createVSBtn" class="btn btn-primary start w-100">
+                                
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="submit" id="createVSBtn" class="btn btn-primary w-100">
                                     <i class="loading-icon spinner-border spinner-border-sm visually-hidden"></i> &nbsp;
                                     <span id="btnText">Submit</span>
                                 </button>
                             </div>
-                            <div class="col-sm-3"></div>
+                        
                         </div>
                     </div>
                 </div><!--row-->
