@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import json
 from lib.f5_api_reqs import f5_custom_create_vs, f5_custom_create_pool
+from lib.f5_api_reqs import f5_create_vs, f5_create_pool
 import re
 import time
 from nw_restapi.settings import config
@@ -34,6 +35,10 @@ def vs_page(request):
         persistence = request.POST.get("persistenceSelect")
         if persistence == "none":
             persistence = None
+
+        username = request.POST.get("adUser")
+        password = request.POST.get("adPass")
+        lb_addr = request.POST.get("vsLoadBalancerSelect")
 
         # Validations
         if config_type == "waf":
@@ -81,7 +86,7 @@ def vs_page(request):
             svc_pool_name = f"{vs_name}_pool"
         
         members = [f"{service}:{svc_port_list[idx]}" for idx, service in enumerate(svc_ip_list)]
-        response = f5_custom_create_pool(svc_pool_name, members, lb_method)
+        response = f5_create_pool(lb_addr, username, password, svc_pool_name, members, lb_method)
         if response is not None:
             if response.status_code == 409:
                 errors.append(f"Pool {svc_pool_name} already exists")
@@ -99,7 +104,7 @@ def vs_page(request):
             waf_pool_name = f"{vs_name}_ssl"
             members = [f"{waf_svc_ip}:80"]
             waf_lb_method = "round-robin"
-            response = f5_custom_create_pool(waf_pool_name, members, waf_lb_method)
+            response = f5_create_pool(lb_addr, username, password, waf_pool_name, members, waf_lb_method)
             if response is not None:
                 if response.status_code == 409:
                     errors.append(f"Pool {waf_pool_name} already exists")
@@ -123,7 +128,7 @@ def vs_page(request):
             ]
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_custom_create_vs(waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     errors.append(f"Virtual Server {waf_ret_vs_name} already exists")
@@ -143,7 +148,7 @@ def vs_page(request):
             profiles = [
                 { "name": "/Common/http_common", "context": "all" }
             ]
-            response = f5_custom_create_vs(http80_vs_name, dest_ip, pool_name, profiles, irule)
+            response = f5_create_vs(lb_addr, username, password, http80_vs_name, dest_ip, pool_name, profiles, irule)
             if response is not None:
                 if response.status_code == 409:
                     errors.append(f"Virtual Server {http80_vs_name} already exists")
@@ -177,7 +182,7 @@ def vs_page(request):
                 irule = "irule_ins_client_XFF"
                 snat = "automap"
                 pool_name = svc_pool_name
-            response = f5_custom_create_vs(ssl_vs_name, dest_ip, pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     errors.append(f"Virtual Server {ssl_vs_name} already exists")
@@ -206,7 +211,7 @@ def vs_page(request):
                 profiles.append({ "name": "/Common/qradar", "context": "all" })
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_custom_create_vs(nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     errors.append(f"Virtual Server {nonssl_vs_name} already exists")
