@@ -38,7 +38,7 @@ def cert_page(request):
             
             sslresult = f5_create_ssl_profile(lb_addr, username, password, certfile.name, certfile.name)
             if sslresult == 200:
-                profile_name = f'{certfile.name.replace(".pfx", "").replace(".tr", "").replace(".com", "").replace(".yapikredi", "")}_{time.strftime("%d_%m_%Y")}'
+                profile_name = f'{certfile.name.replace(".yapikredi.com.tr.pfx", "").replace(".com.tr.pfx", "").replace(".tr.pfx", "").replace(".com.pfx", "")}_{time.strftime("%d_%m_%Y")}'
                 clientssl_result = f"Success"
             else:
                 profile_name = ""

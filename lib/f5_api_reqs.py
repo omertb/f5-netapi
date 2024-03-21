@@ -195,7 +195,7 @@ def f5_custom_file_upload(filename):
 
 def f5_create_ssl_profile(host, user, passwd, certname, keyname):
     payload = {}
-    payload['name'] = f'{certname.replace(".pfx", "").replace(".tr", "").replace(".com", "").replace(".yapikredi", "")}_{time.strftime("%d_%m_%Y")}'
+    payload['name'] = f'{certname.replace(".yapikredi.com.tr.pfx", "").replace(".com.tr.pfx", "").replace(".tr.pfx", "").replace(".com.pfx", "")}_{time.strftime("%d_%m_%Y")}'
     payload['cert'] = certname
     payload['key'] = keyname
     payload["ciphers"] = "none"
