@@ -11,20 +11,28 @@
 <div class="container">
 <!-- to show entries as card add below: data-show-toggle="true"-->
     <div class="row">
+        <div class="col-md-3">
+            <select class="form-select form-select-sm mb-2" name="vsLoadBalancerSelectCache" id="vsLoadBalancerSelectCache" aria-label="Select Load Balancer">
+                {% for lb_name, lb_addr in load_balancers.items %}
+                <option value="{{ lb_addr }}">{{ lb_name }} - {{ lb_addr }}</option>
+                {% endfor %}
+            </select>
+            {% csrf_token %}
+        </div>
+        <div class="col-md-9"></div>
+    </div>
+    <div class="row">
         <div id="cacheStatsTableToolbar" class="mt-2">
-            <button id="getCacheStatsButton" type="button" class="btn btn-outline-success btn-sm">
-                Get Cache Stats
-            </button>
             {% include '_modals.html' %}
         </div>
         <table
             id="cacheStatsTable"
             class="table table-hover table-sm table-responsive table-striped"
-            data-search="true"
+            data-search="false"
             data-toolbar="#cacheStatsTableToolbar"
-            data-pagination="true"
-            data-single-select="true"
-            data-click-to-select="true"
+            data-pagination="false"
+            data-single-select="false"
+            data-click-to-select="false"
             data-show-columns="true"
             data-page-list="[10, 25, 50, 100, ALL]"
             data-show-fullscreen="true"
@@ -32,7 +40,7 @@
         >
             <thead class="thead-dark">
             <tr>
-                <th scope="col" data-field="state" data-checkbox="true" data-width="1" data-width-unit="%"></th>
+                <th scope="col" data-field="state" data-checkbox="false" data-width="1" data-width-unit="%"></th>
                 <!--<th data-field="id" data-width="2" data-visible="false" data-width-unit="%">Num</th>-->
                 <th scope="col" data-field="cache_count" data-sortable="true" data-width="12" data-width-unit="%">Cache Count</th>
                 <th scope="col" data-field="cache_hits" data-sortable="true" data-width="8" data-width-unit="%">Cache Hits</th>
@@ -44,6 +52,7 @@
             </thead>
             <tbody id="cacheStatsTableBody"></tbody>
         </table>
+        <div id="errorDiv"></div>
 
     </div>
 

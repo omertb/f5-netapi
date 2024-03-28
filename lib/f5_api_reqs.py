@@ -111,8 +111,8 @@ def f5_get_cache_status(host, user, passwd):
         return None
 
 
-def get_custom_f5_stats():
-    return f5_get_cache_status(F5_HOST, F5_USER, F5_PASS)
+def get_custom_f5_stats(lb_host):
+    return f5_get_cache_status(lb_host, F5_USER, F5_PASS)
 
 
 def f5_delete_cache(host, user, passwd):
