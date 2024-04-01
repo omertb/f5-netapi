@@ -209,7 +209,17 @@ LOGGING = {
         },
     },
     'loggers': {
-       'operations': {
+       'cache_ops': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'cert_ops': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'vs_ops': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,

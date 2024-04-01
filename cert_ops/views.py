@@ -6,6 +6,21 @@ from lib.f5_api_reqs import f5_import_pfx_cert, f5_file_upload, f5_create_ssl_pr
 import time
 from nw_restapi.settings import config
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+def get_client_ip(req):
+    x_forwarded_for = req.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        client_ip = x_forwarded_for.split(',')[-1]
+    else:
+        client_ip = req.META.get("REMOTE_ADDR")
+    return client_ip
+
+
 
 def cert_page(request):
     load_balancers = {}
@@ -14,6 +29,7 @@ def cert_page(request):
     
     if 'certfile' in request.FILES:
         if request.method == 'POST' and request.FILES['certfile']:
+            client_ip = get_client_ip(request)
             certfile = request.FILES['certfile']
             lb_addr = request.POST.get('loadBalancerSelect')
             username = request.POST.get("adUser")
@@ -26,22 +42,27 @@ def cert_page(request):
 
             uresult = f5_file_upload(lb_addr, username, password, certfile.name)
             if uresult == 200:
+                logger.info(f"{client_ip} - {username} - File: {certfile.name} upload is successful.")
                 upload_result = "Success"
             else:
+                logger.info(f"{client_ip} - {username} - File: {certfile.name} upload is FAILED.")
                 upload_result = "FAILED"
 
             iresult = f5_import_pfx_cert(lb_addr, username, password, certfile.name, pfx_passphrase)
             if iresult == 200:
+                logger.info(f"{client_ip} - {username} - Pfx: {certfile.name} import is successful.")
                 import_result = "Success"
             else:
+                logger.info(f"{client_ip} - {username} - Pfx: {certfile.name} import FAILED.")
                 import_result = "FAILED"
             
             sslresult = f5_create_ssl_profile(lb_addr, username, password, certfile.name, certfile.name)
+            profile_name = f'{certfile.name.replace(".yapikredi.com.tr.pfx", "").replace(".com.tr.pfx", "").replace(".tr.pfx", "").replace(".com.pfx", "")}_{time.strftime("%d_%m_%Y")}'
             if sslresult == 200:
-                profile_name = f'{certfile.name.replace(".yapikredi.com.tr.pfx", "").replace(".com.tr.pfx", "").replace(".tr.pfx", "").replace(".com.pfx", "")}_{time.strftime("%d_%m_%Y")}'
+                logger.info(f"{client_ip} - {username} - SSL Client Profile: {profile_name} creation is successful.")
                 clientssl_result = f"Success"
             else:
-                profile_name = ""
+                logger.info(f"{client_ip} - {username} - SSL Client Profile: {profile_name} creation FAILED.")
                 clientssl_result = "FAILED"
 
             return render(request, 'cert_upload.html', {
@@ -58,8 +79,12 @@ def cert_page(request):
 
 def get_ssl_profiles(request):
     if request.method == 'POST':
+        client_ip = get_client_ip(request)
         lb_host = request.body.decode()
         name_list = f5_custom_get_client_ssl_profiles(lb_host)
         if name_list is not None:
+            logger.info(f"{client_ip} - Called get_ssl_profiles for LB: {lb_host} successfully.")
             return JsonResponse(name_list, safe=False)
+        else:
+            logger.info(f"{client_ip} - Calling get_ssl_profiles for LB: {lb_host} FAILED.")
         
