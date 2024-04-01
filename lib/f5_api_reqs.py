@@ -124,8 +124,8 @@ def f5_delete_cache(host, user, passwd):
         return None
 
 
-def delete_custom_f5_cache():
-    return f5_delete_cache(F5_HOST, F5_USER, F5_PASS)
+def delete_custom_f5_cache(lb_host, username, password):
+    return f5_delete_cache(lb_host, username, password)
 
 
 def f5_import_pfx_cert(host, user, passwd, filename, passphrase):

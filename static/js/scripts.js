@@ -18,10 +18,23 @@ $(document).on("click", "#getCacheStatsButton" , function(event){
 });
 
 let clearCacheResult = document.getElementById("clearCacheResult");
+let adUser = document.getElementById("adUser");
+let adPass = document.getElementById("adPass");
+let loadBalancerSelectCache = document.getElementById("vsLoadBalancerSelectCache");
 $(document).on("click", "#clearCacheButton" , function(event){
+    let username = adUser.value;
+    let password = adPass.value;
+    let selected_lb = loadBalancerSelectCache.value;
+    let credentials = JSON.stringify({username: username, password: password, selected_lb: selected_lb});
+    $.ajaxSetup({
+        headers: {
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+        }
+    });
     $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/cache/delete",
+        data: credentials,
         success: function(response_data){
             $cacheStatsTable.bootstrapTable("destroy");
             clearCacheResult.innerHTML = '<div class="mt-4 text-center alert alert-warning">' + response_data + '</div>';
@@ -35,7 +48,7 @@ $(document).on("click", "#clearCacheModalClose", function(event){
     clearCacheResult.innerHTML = "";
 });
 
-let loadBalancerSelectCache = document.getElementById("vsLoadBalancerSelectCache");
+
 document.addEventListener("DOMContentLoaded", function() { 
     let selected_lb = loadBalancerSelectCache.value;
     $.ajaxSetup({

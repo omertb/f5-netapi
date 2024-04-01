@@ -2,6 +2,7 @@ from django.shortcuts import render
 from lib.f5_api_reqs import get_custom_f5_stats, delete_custom_f5_cache
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from nw_restapi.settings import config
+import json
 
 
 # Create your views here.
@@ -33,8 +34,21 @@ def create_cache_stats_json(request):
 
 
 def delete_cache(request):
-    delete_cache_result = delete_custom_f5_cache()
-    if delete_cache_result is not None:
-        return HttpResponse("All objects in cache is cleared.")
-    else:
-        return HttpResponseServerError("Failed to delete cache!")
+    if request.method == 'POST':
+        credentials = json.loads(request.body)
+        if credentials['username'] == "" or credentials['password'] == "":
+            message = "Enter your username, password please"
+            return HttpResponseServerError(message)
+            #return JsonResponse({'message':message}, status=400)
+        else:
+            delete_cache_result = delete_custom_f5_cache(credentials['selected_lb'], credentials['username'], credentials['password'])
+            if delete_cache_result is not None:
+                return HttpResponse("All objects in cache is cleared.")
+            else:
+                return HttpResponseServerError("Failed to delete cache!")
+            #return JsonResponse("SUCCESS", safe=False)
+    #delete_cache_result = delete_custom_f5_cache()
+    #if delete_cache_result is not None:
+    #    return HttpResponse("All objects in cache is cleared.")
+    #else:
+    #    return HttpResponseServerError("Failed to delete cache!")

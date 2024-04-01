@@ -13,10 +13,23 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
         </button>
       </div>
-      <div class="modal-body text-center" style="color:red;">
-        All cache objects will be deleted!<br>
-          <b style="color:black;">Are you sure?</b>
-          <div id="clearCacheResult" style="color:darkblue;text-align: left"></div>
+      <div class="modal-body text-center">
+        <span style="color:red;">All cache objects in cache will be deleted!</span><br>
+        <div id="adUserDiv" class="mt-4 row">
+          <label for="adUser" class="col-sm-4 col-form-label text-start">AD User:</label>
+          <div class="col-sm-8">
+          <input type="text" class="form-control form-control-sm" name="adUser" id="adUser" placeholder="Username" required>
+          </div>
+        </div>
+
+        <div id="adPassDiv" class="mt-2 row">
+            <label for="adPass" class="col-sm-4 col-form-label text-start">AD Password:</label>
+            <div class="col-sm-8">
+            <input type="password" class="form-control form-control-sm" name="adPass" id="adPass" placeholder="Password" required>
+            </div>
+        </div>
+        <b style="color:black;">Are you sure?</b>
+        <div id="clearCacheResult" style="color:darkblue;text-align: left"></div>
       </div>
       <div class="modal-footer">
         <button id="clearCacheModalClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
