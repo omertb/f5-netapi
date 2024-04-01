@@ -20,6 +20,8 @@ import configparser
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 COMMON_CONFIG_FILE = os.path.join(BASE_DIR, 'common.config')
+config = configparser.ConfigParser()
+config.read(COMMON_CONFIG_FILE)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -38,7 +40,9 @@ CSRF_COOKIE_SECURE = False  # change to True if behind ssl-proxy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+
+SERVER_IP = config.get('COMMON', 'server_ip')
+ALLOWED_HOSTS = ['127.0.0.1', SERVER_IP]
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
 
@@ -147,8 +151,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Ldap Login
-config = configparser.ConfigParser()
-config.read(COMMON_CONFIG_FILE)
 LDAP_HOST = config.get('LDAP', 'host')
 SEARCH_DN = config.get('LDAP', 'search_dn')
 GROUP_DN = config.get('LDAP', 'group_dn')

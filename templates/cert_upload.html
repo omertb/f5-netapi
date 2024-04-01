@@ -101,6 +101,9 @@
     </div>
 
     <div class="row mt-4">
+          {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+          {% endif %}
           {% if upload_result %}
             <div class="alert {% if upload_result == 'Success' %}alert-success{% else %}alert-danger{% endif %}">File Upload Result: {{ upload_result }} on {{ lb_addr }}</div>
           {% endif %}

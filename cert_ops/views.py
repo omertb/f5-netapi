@@ -6,6 +6,7 @@ from lib.f5_api_reqs import f5_import_pfx_cert, f5_file_upload, f5_create_ssl_pr
 import time
 from nw_restapi.settings import config
 import json
+import re
 import logging
 
 
@@ -31,6 +32,16 @@ def cert_page(request):
         if request.method == 'POST' and request.FILES['certfile']:
             client_ip = get_client_ip(request)
             certfile = request.FILES['certfile']
+
+            if certfile.name.split(".")[-1] != "pfx":
+                msg = "File should be in pfx format!"
+                return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
+            # check certificate name against valid characters
+            valid_str_re = "^[A-Za-z0-9_\.]+$"
+            if not re.compile(valid_str_re).match(file.filename):
+                msg = "Failed : Valid Characters: A-Z, a-z, 0-9, _(underscore) and .(dot)"
+                return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
+            
             lb_addr = request.POST.get('loadBalancerSelect')
             username = request.POST.get("adUser")
             password = request.POST.get("adPass")
