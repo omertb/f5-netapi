@@ -195,10 +195,9 @@
                             <div class="col-md-4">
                                 <label for="persistenceSelect" class="form-label" style="font-size: 14px;">Persistence:</label>
                                 <select class="form-select form-select-sm" name="persistenceSelect" id="persistenceSelect" aria-label="Select Persistence">
-                                    <option value="none" selected>None</option>
+                                    <option value="persist_cookie" selected>Encrypted Cookie</option>
                                     <option value="source_addr">Source Address</option>
-                                    <option value="persist_cookie">Encrypted Cookie</option>
-                                    <option value="cookie">Cookie</option>
+                                    <option value="none">None</option>
                                 </select>
                             </div>
                             <div class="col-md-4"></div>
@@ -272,12 +271,19 @@
                     </div>
                 </div><!--row-->
             </form>
+            
 
         </div>
         <div class="col-xxl-6 col-lg-4 col-12 ">
             <div id="successDiv">
+                <ul id="successDivList" class="alert alert-success alert-dismissable">
+
+                </ul>
             </div>
             <div id="errorDiv">
+                <ul id="errorDivList" class="alert alert-danger alert-dismissable">
+
+                </ul>
             </div>
             {% if success %}
                 {% for msg in success %}

@@ -8,11 +8,38 @@ $(document).on({
 
 // disable button when submittin on create vs form
 $(document).ready(function() {
-    $("#createVSForm").submit(function() {
+    $("#createVSForm").submit(function(event) {
+        
         $(".loading-icon").removeClass("visually-hidden");
         $("#createVSForm").attr("disabled", true);
         $("#createVSBtn").attr("disabled", true);
         $("#btnText").text("Submitting ...");
+        
+       /*
+        // if the form is invalid, let the browser handle validation
+        if (this.checkValidity()) {
+            return false;
+        }
+        event.preventDefault();
+        let formData = $(this).serialize();
+        $.ajaxSetup({
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "/vs",
+            data: formData,
+            success: function(response_data){
+                document.getElementById("successDivList").innerHTML = '<li>' + response_data.join('</li><li>') + '</li>';
+            },
+            error: function(response_data){
+                document.getElementById("errorDivList").innerHTML = '<li>' + response_data.join('</li><li>') + '</li>';
+            }
+        });
+        */
+        
     });
 });
 
