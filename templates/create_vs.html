@@ -253,7 +253,7 @@
                                         </div>
                                         <div class="modal-footer">
                                         <button id="createVSModalClose" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                                        <button id="createVSBtn" type="submit" class="btn btn-outline-primary">
+                                        <button id="createVSBtn" type="button" onclick="submitForm()" class="btn btn-outline-primary">
                                             <i class="loading-icon spinner-border spinner-border-sm visually-hidden"></i>
                                             <span id="btnText">Create</span>
                                         </button>
@@ -276,13 +276,11 @@
         </div>
         <div class="col-xxl-6 col-lg-4 col-12 ">
             <div id="successDiv">
-                <ul id="successDivList" class="alert alert-success alert-dismissable">
-
+                <ul id="successDivList">
                 </ul>
             </div>
             <div id="errorDiv">
-                <ul id="errorDivList" class="alert alert-danger alert-dismissable">
-
+                <ul id="errorDivList">
                 </ul>
             </div>
             {% if success %}
