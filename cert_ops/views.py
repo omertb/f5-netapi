@@ -47,6 +47,7 @@ def cert_page(request):
             password = request.POST.get("adPass")
             pfx_passphrase = request.POST.get("pfxPassphrase")
             create_same_as_filename = request.POST.get("fileNameCheck")
+            ecdhe_check = request.POST.get("ecdheCheck")
             if pfx_passphrase == "":
                 pfx_passphrase = "12345678"
             
@@ -75,7 +76,11 @@ def cert_page(request):
                 import_result = "FAILED"
 
             profile_name = re.sub(r'\.pfx$', '', certname)
-            sslresult = f5_create_ssl_profile(lb_addr, username, password, profile_name, certname, certname)
+            if ecdhe_check == "yes":
+                ecdhe = True
+            else:
+                ecdhe = False
+            sslresult = f5_create_ssl_profile(lb_addr, username, password, profile_name, certname, certname, ecdhe)
             if sslresult == 200:
                 logger.info(f"{client_ip} - {username} - SSL Client Profile: {profile_name} creation is successful.")
                 clientssl_result = f"Success"

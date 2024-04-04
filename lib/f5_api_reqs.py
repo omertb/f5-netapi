@@ -193,13 +193,14 @@ def f5_custom_file_upload(filename):
     return f5_file_upload(F5_HOST, F5_USER, F5_PASS, filename)
 
 
-def f5_create_ssl_profile(host, user, passwd, profile_name, certname, keyname):
+def f5_create_ssl_profile(host, user, passwd, profile_name, certname, keyname, ecdhe):
     payload = {}
     payload['name'] = profile_name
     payload['cert'] = certname
     payload['key'] = keyname
-    payload["ciphers"] = "none"
-    payload["cipherGroup"] = "/Common/yapikredi_ecdhe"
+    if ecdhe:
+        payload["ciphers"] = "none"
+        payload["cipherGroup"] = "/Common/yapikredi_ecdhe"
     create_ssl_profile_api_url =  f"https://{host}/mgmt/tm/ltm/profile/client-ssl"
     response = f5_api_request("POST", create_ssl_profile_api_url, user, passwd, data=json.dumps(payload))
     if response is not None:
