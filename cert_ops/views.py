@@ -38,7 +38,7 @@ def cert_page(request):
                 return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
             # check certificate name against valid characters
             valid_str_re = "^[A-Za-z0-9_\.]+$"
-            if not re.compile(valid_str_re).match(file.filename):
+            if not re.compile(valid_str_re).match(certfile.name):
                 msg = "Failed : Valid Characters: A-Z, a-z, 0-9, _(underscore) and .(dot)"
                 return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
             
@@ -46,29 +46,36 @@ def cert_page(request):
             username = request.POST.get("adUser")
             password = request.POST.get("adPass")
             pfx_passphrase = request.POST.get("pfxPassphrase")
+            create_same_as_filename = request.POST.get("fileNameCheck")
             if pfx_passphrase == "":
                 pfx_passphrase = "12345678"
+            
             fs = FileSystemStorage()
-            filename = fs.save(certfile.name, certfile)
+            if create_same_as_filename == "yes":
+                certname = certfile.name
+            else:
+                certfile.name = certfile.name.replace(".yapikredi.com.tr.pfx", ".pfx").replace(".com.tr.pfx", ".pfx").replace(".tr.pfx", ".pfx").replace(".com.pfx", ".pfx")
+                certname = re.sub(r'\.pfx$', f'_{time.strftime("%d_%m_%Y")}.pfx', certfile.name)
+            filename = fs.save(certname, certfile)
 
-            uresult = f5_file_upload(lb_addr, username, password, certfile.name)
+            uresult = f5_file_upload(lb_addr, username, password, certname)
             if uresult == 200:
-                logger.info(f"{client_ip} - {username} - File: {certfile.name} upload is successful.")
+                logger.info(f"{client_ip} - {username} - File: {certname} upload is successful.")
                 upload_result = "Success"
             else:
-                logger.info(f"{client_ip} - {username} - File: {certfile.name} upload is FAILED.")
+                logger.info(f"{client_ip} - {username} - File: {certname} upload is FAILED.")
                 upload_result = "FAILED"
 
-            iresult = f5_import_pfx_cert(lb_addr, username, password, certfile.name, pfx_passphrase)
+            iresult = f5_import_pfx_cert(lb_addr, username, password, certname, pfx_passphrase)
             if iresult == 200:
-                logger.info(f"{client_ip} - {username} - Pfx: {certfile.name} import is successful.")
+                logger.info(f"{client_ip} - {username} - Pfx: {certname} import is successful.")
                 import_result = "Success"
             else:
-                logger.info(f"{client_ip} - {username} - Pfx: {certfile.name} import FAILED.")
+                logger.info(f"{client_ip} - {username} - Pfx: {certname} import FAILED.")
                 import_result = "FAILED"
-            
-            sslresult = f5_create_ssl_profile(lb_addr, username, password, certfile.name, certfile.name)
-            profile_name = f'{certfile.name.replace(".yapikredi.com.tr.pfx", "").replace(".com.tr.pfx", "").replace(".tr.pfx", "").replace(".com.pfx", "")}_{time.strftime("%d_%m_%Y")}'
+
+            profile_name = re.sub(r'\.pfx$', '', certname)
+            sslresult = f5_create_ssl_profile(lb_addr, username, password, profile_name, certname, certname)
             if sslresult == 200:
                 logger.info(f"{client_ip} - {username} - SSL Client Profile: {profile_name} creation is successful.")
                 clientssl_result = f"Success"
