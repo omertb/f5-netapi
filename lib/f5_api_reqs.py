@@ -271,7 +271,7 @@ def get_vserver_profiles(lb_ip, vs_name):
         return None
 
 
-def get_irules(lb_ip, irule_name):
+def get_irule(lb_ip, irule_name):
     get_irule_url = f"https://{lb_ip}/mgmt/tm/ltm/rule/{irule_name}"
     response = f5_api_request("GET", get_irule_url, F5_USER, F5_PASS)
     if response is not None:

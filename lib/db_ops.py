@@ -10,15 +10,15 @@ def get_create_pool_members_db(lb_ip, lb_id, pool_name):
     current_members = []
     for member in pool_members:
         try:
-            db_member = Member.objects.get(name=member['name'], pool_name=pool_name, lb=lb_id)
+            db_member = Member.objects.get(name=member['name'], pool_name=pool_name, lb_id=lb_id)
             current_members.append(db_member)
         except Member.DoesNotExist:
             member_db_values = {
                 'name': member['name'],
                 'ip_addr': member['address'],
-                'port': member['name'].split(':')[-1]
+                'port': member['name'].split(':')[-1],
                 'pool_name': pool_name,
-                'lb': lb_id,
+                'lb_id': lb_id,
                 'state': member['state'],
                 'monitor': member['monitor'],
                 'session': member['session']
@@ -30,16 +30,16 @@ def get_create_pool_members_db(lb_ip, lb_id, pool_name):
 
 def get_create_vserver_pool_db(lb_ip, lb_id, pool_name):
     try:
-        db_pool = Pool.objects.get(name=pool_name,lb=lb_id)
+        db_pool = Pool.objects.get(name=pool_name, lb_id=lb_id)
     except Pool.DoesNotExist:
         pool = get_pool(lb_ip, pool_name)
         if pool is None:
             return None
         pool_db_values = {
             'name': pool['name'],
-            'lb': lb_id,
+            'lb_id': lb_id,
             'lb_method': pool['loadBalancingMode'],
-            'monitor': pool['monitor'].split('/')[-1],
+            'monitor': pool['monitor'].split('/')[-1]
         }
         db_pool = Pool(**pool_db_values)
     pool_members = get_create_pool_members_db(lb_ip, lb_id, pool_name)
@@ -53,12 +53,12 @@ def create_irules_db(lb_ip, lb_id, rules):
     for rule in rules:
         rule_name = rule.split('/')[-1]
         result = get_irule(lb_ip, rule_name)
-        IRULE_EXISTS = IRule.objects.filter(name=rule_name, lb=lb_id)
+        IRULE_EXISTS = IRule.objects.filter(name=rule_name, lb_id=lb_id)
         if IRULE_EXISTS:
             db_irule = IRULE_EXISTS.get()
             db_irule.content = result['apiAnonymous']   
         else:
-            db_irule = IRule(name=rule_name, lb_id, content=result['apiAnonymous'])
+            db_irule = IRule(name=rule_name, lb_id=lb_id, content=result['apiAnonymous'])
         db_irule.save()
         db_irules.append(db_irule)
     return db_irules
@@ -69,11 +69,11 @@ def create_vserver_policies_db(lb_ip, lb_id, vs_name):
     policies = get_vserver_policies(lb_ip, vs_name)
     if policies is not None:
         for policy in policies:
-            POLICY_EXISTS = Policy.objects.filter(name=policy['name'], lb=lb_id)
+            POLICY_EXISTS = Policy.objects.filter(name=policy['name'], lb_id=lb_id)
             if POLICY_EXISTS:
                 db_policy = POLICY_EXISTS.get()
             else:
-                db_policy = Policy(name=policy['name'], lb=lb_id)
+                db_policy = Policy(name=policy['name'], lb_id=lb_id)
                 db_policy.save()
             db_policies.append(db_policy)
     return db_policies
@@ -84,12 +84,12 @@ def create_vserver_profiles_db(lb_ip, lb_id, vs_name):
     profiles = get_vserver_profiles(lb_ip, vs_name)
     if profiles is not None:
         for profile in profiles:
-            PROFILE_EXISTS = Profile.objects.filter(name=profile['name'], lb=lb_id)
+            PROFILE_EXISTS = Profile.objects.filter(name=profile['name'], lb_id=lb_id)
             if PROFILE_EXISTS:
                 db_profile = PROFILE_EXISTS.get()
                 db_profile.context = profile['context']
             else:
-                db_profile = Profile(name=profile['name'], lb=lb_id, context=profile['context'])
+                db_profile = Profile(name=profile['name'], lb_id=lb_id, context=profile['context'])
             db_profile.save()
             db_profiles.append(db_profile)
     return db_profiles
@@ -98,13 +98,16 @@ def create_update_vs_table(lb_ip, lb_id):
     vservers = get_vservers(lb_ip)
     if vservers is not None:
         for vserver in vservers:
-            VS_EXISTS = VServer.objects.filter(name=vserver['name'], lb=lb_id)
+            VS_EXISTS = VServer.objects.filter(name=vserver['name'], lb_id=lb_id)
             if VS_EXISTS:
                 db_vserver = VS_EXISTS.get()  # convert queryset to single item
                 if 'pool' in vserver:
-                    if db_vserver.pool.name != vserver['pool']:
+                    if db_vserver.pool is None:
                         pool_id = get_create_vserver_pool_db(lb_ip, lb_id, vserver['pool'])
-                        db_vserver.pool = pool_id
+                        db_vserver.pool_id = pool_id
+                    elif db.vserver.pool.name != vserver['pool']:
+                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, vserver['pool'])
+                        db_vserver.pool_id = pool_id
                 else:
                     db_vserver.pool = None
             else:
@@ -114,15 +117,16 @@ def create_update_vs_table(lb_ip, lb_id):
                 else:
                     pool_id = None
                 vserver_db_values = {
-                    'name': vserver['name']
+                    'name': vserver['name'],
                     'ip_addr': vsip,
-                    'port': port,
+                    'port': vsport,
                     'nat': vserver['sourceAddressTranslation']['type'],
                     'persistence': ', '.join([persistence['name'] for persistence in vserver['persist']]) if 'persist' in vserver else None,
-                    'lb': lb_id,
-                    'pool': pool_id
+                    'lb_id': lb_id,
+                    'pool_id': pool_id
                 }
                 db_vserver = VServer(**vserver_db_values)
+                db_vserver.save()
             
             if 'rules' in vserver:
                 irules = create_irules_db(lb_ip, lb_id, vserver['rules'])
