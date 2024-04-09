@@ -211,3 +211,73 @@ def f5_create_ssl_profile(host, user, passwd, profile_name, certname, keyname, e
 
 def f5_custom_create_ssl_profile(pfx_certname):
     return f5_create_ssl_profile(F5_HOST, F5_USER, F5_PASS, pfx_certname, pfx_certname)
+
+
+def get_vservers(lb_ip):
+    get_vservers_url = f"https://{lb_ip}/mgmt/tm/ltm/virtual"
+    response = f5_api_request("GET", get_vservers_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)['items']
+        else:
+            return None
+    else:
+        return None
+
+
+def get_pool_members(lb_ip, pool_name):
+    get_pool_members_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name/members}"
+    response = f5_api_request("GET", get_pool_members_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)['items']
+        else:
+            return None
+    else:
+        return None
+
+def get_pool(lb_ip, pool_name):
+    get_pool_pool_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name}"
+    response = f5_api_request("GET", get_pool_pool_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            return None
+    else:
+        return None
+
+def get_vserver_policies(lb_ip, vs_name):
+    get_vserver_policy_url = f"https://{lb_ip}/mgmt/tm/ltm/virtual/{vs_name}/policies"
+    response = f5_api_request("GET", get_vserver_policy_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)['items']
+        else:
+            return None
+    else:
+        return None
+
+
+def get_vserver_profiles(lb_ip, vs_name):
+    get_vserver_profiles_url = f"https://{lb_ip}/mgmt/tm/ltm/virtual/{vs_name}/profiles"
+    response = f5_api_request("GET", get_vserver_profiles_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)['items']
+        else:
+            return None
+    else:
+        return None
+
+
+def get_irules(lb_ip, irule_name):
+    get_irule_url = f"https://{lb_ip}/mgmt/tm/ltm/rule/{irule_name}"
+    response = f5_api_request("GET", get_irule_url, F5_USER, F5_PASS)
+    if response is not None:
+        if response.status_code == 200:
+            return json.loads(response.text)
+        else:
+            return None
+    else:
+        return None
