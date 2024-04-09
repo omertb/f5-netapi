@@ -42,8 +42,9 @@ def get_create_vserver_pool_db(lb_ip, lb_id, pool_name):
             'monitor': pool['monitor'].split('/')[-1]
         }
         db_pool = Pool(**pool_db_values)
+    db_pool.save()
     pool_members = get_create_pool_members_db(lb_ip, lb_id, pool_name)
-    db_pool.members.set(pool_members)
+    db_pool.member.set(pool_members)
     db_pool.save()
     return db_pool.id
 
@@ -102,18 +103,20 @@ def create_update_vs_table(lb_ip, lb_id):
             if VS_EXISTS:
                 db_vserver = VS_EXISTS.get()  # convert queryset to single item
                 if 'pool' in vserver:
+                    pool_name = vserver['pool'].split('/')[-1]
                     if db_vserver.pool is None:
-                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, vserver['pool'])
+                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
                         db_vserver.pool_id = pool_id
-                    elif db.vserver.pool.name != vserver['pool']:
-                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, vserver['pool'])
+                    elif db.vserver.pool.name != pool_name:
+                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
                         db_vserver.pool_id = pool_id
                 else:
                     db_vserver.pool = None
             else:
                 vsip, vsport = vserver['destination'].split('/')[-1].split(':')
                 if 'pool' in vserver:
-                    pool_id = get_create_vserver_pool_db(lb_ip, lb_id, vserver['pool'])
+                    pool_name = vserver['pool'].split('/')[-1]
+                    pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
                 else:
                     pool_id = None
                 vserver_db_values = {

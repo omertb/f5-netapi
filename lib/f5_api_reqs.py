@@ -226,7 +226,7 @@ def get_vservers(lb_ip):
 
 
 def get_pool_members(lb_ip, pool_name):
-    get_pool_members_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name/members}"
+    get_pool_members_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name}/members"
     response = f5_api_request("GET", get_pool_members_url, F5_USER, F5_PASS)
     if response is not None:
         if response.status_code == 200:
@@ -237,8 +237,8 @@ def get_pool_members(lb_ip, pool_name):
         return None
 
 def get_pool(lb_ip, pool_name):
-    get_pool_pool_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name}"
-    response = f5_api_request("GET", get_pool_pool_url, F5_USER, F5_PASS)
+    get_pool_url = f"https://{lb_ip}/mgmt/tm/ltm/pool/{pool_name}"
+    response = f5_api_request("GET", get_pool_url, F5_USER, F5_PASS)
     if response is not None:
         if response.status_code == 200:
             return json.loads(response.text)
