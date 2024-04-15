@@ -6,6 +6,10 @@ import re
 import time
 from nw_restapi.settings import config
 import logging
+from . models import VServer
+from django.http import JsonResponse
+from django.template.defaultfilters import escape
+from django.utils.safestring import mark_safe
 
 
 logger = logging.getLogger(__name__)
@@ -288,3 +292,60 @@ def vs_page(request):
         return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
 
     return render(request, 'create_vs.html', {'load_balancers': load_balancers})
+
+
+def virtuals(request):
+    db_vservers = VServer.objects.all()
+    response_json = []
+    for db_vserver in db_vservers:
+        vserver_dict = {
+            'lb': db_vserver.lb.name,
+            'name' : db_vserver.name,
+            'ip_addr': db_vserver.ip_addr,
+            'port': db_vserver.port,
+            'nat': db_vserver.nat,
+            'persistence': db_vserver.persistence
+        }
+        if db_vserver.pool is not None:
+            vserver_dict['pool'] = db_vserver.pool.name
+            vserver_dict['lb_method'] = db_vserver.pool.lb_method
+            vserver_dict['monitor'] = db_vserver.pool.monitor
+            vserver_dict['pool_members'] = [
+                {
+                    'name': member['name'],
+                    'ip_addr': member['ip_addr'],
+                    'port': member['port'],
+                    'state': member['state'],
+                    'session': member['session']
+                } for member in db_vserver.pool.member.values()
+            ]
+        else:
+            vserver_dict['pool'] = None
+            vserver_dict['lb_method'] = None
+            vserver_dict['monitor'] = None
+            vserver_dict['pool_members'] = None
+        irules = [{irule['name']: irule['content']} for irule in db_vserver.irule.values()]
+        irules_html_list = []
+        for irule in irules:
+            irule_html = f"""
+                <a href="#" 
+                class="tooltip-trigger" 
+                data-bs-custom-class="custom-tooltip" 
+                data-bs-toggle="tooltip" 
+                data-bs-trigger="hover focus" 
+                data-bs-placement="auto" 
+                data-bs-html="false" 
+                data-bs-title="{escape(list(irule.values())[0])}">
+                {list(irule.keys())[0]}
+                </a>
+            """
+            #irule_html = f'<a href="#" class="popover-trigger" data-bs-custom-class="custom-popover" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="auto" data-bs-html="true" data-bs-title="iRule Code" data-bs-content="{escape(list(irule.values())[0])}">{list(irule.keys())[0]}</a>'
+            irules_html_list.append(irule_html)
+        vserver_dict['irules'] = ', '.join(irules_html_list)
+        vserver_dict['policies'] = ', '.join([policy['name'] for policy in db_vserver.policy.values()])
+        vserver_dict['profiles'] = ', '.join([profile['name'] for profile in db_vserver.profile.values()])
+        response_json.append(vserver_dict)
+    return JsonResponse(response_json, safe=False)
+
+def show_vs(request):
+    return render(request, 'show_vs.html')

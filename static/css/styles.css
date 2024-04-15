@@ -32,3 +32,39 @@
  body.loading .wait-modal {
      display: block;
  }
+
+ .tooltip-inner {
+    text-align: left;
+    font-size: smaller;
+    white-space: pre-wrap;
+ }
+
+.custom-tooltip {
+    --bs-tooltip-bg: black;
+    --bs-tooltip-color: var(--bs-white);
+    --bs-tooltip-max-width: 600px;
+}
+
+.tooltip-trigger {
+    text-decoration: none;
+    color: brown;
+}
+
+
+.popover-content {
+    font-size: smaller;
+    white-space: pre-wrap;
+}
+
+.popover-title {
+    font-size: smaller;
+}   
+ 
+.custom-popover {
+    --bs-popover-max-width: 600px;
+}
+
+.popover-trigger {
+    text-decoration: none;
+    color: brown;
+}

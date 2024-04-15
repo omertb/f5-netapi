@@ -255,7 +255,3 @@ loadBalancerSelect.addEventListener("change", function(){
     });
 });
 
-// prevent form inputs to be get lost
-document.addEventListener("DOMContentLoaded", function() {
-
-  });

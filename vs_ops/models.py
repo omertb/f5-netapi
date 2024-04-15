@@ -28,7 +28,7 @@ class Member(models.Model):
 class Pool(models.Model):
     name = models.CharField(max_length=64)
     lb = models.ForeignKey(LoadBalancer, on_delete=models.CASCADE)
-    member = models.ManyToManyField(Member, blank=True, related_name="members")
+    member = models.ManyToManyField(Member, blank=True, related_name="bound_pool")
     lb_method = models.CharField(max_length=64)
     monitor = models.CharField(max_length=64)
 
@@ -82,9 +82,9 @@ class VServer(models.Model):
     persistence = models.CharField(max_length=32, null=True)
     lb = models.ForeignKey(LoadBalancer, on_delete=models.CASCADE)
     pool = models.ForeignKey(Pool, null=True, on_delete=models.SET_NULL)
-    irule = models.ManyToManyField(IRule, blank=True, related_name="irules")
-    policy = models.ManyToManyField(Policy, blank=True, related_name="policies")
-    profile = models.ManyToManyField(Profile, blank=True, related_name="profiles")
+    irule = models.ManyToManyField(IRule, blank=True, related_name="bound_vservers")
+    policy = models.ManyToManyField(Policy, blank=True, related_name="bound_vservers")
+    profile = models.ManyToManyField(Profile, blank=True, related_name="bound_vservers")
 
     class Meta:
         unique_together = (("name", "lb"),)

@@ -1,6 +1,7 @@
 from vs_ops.models import LoadBalancer, Member, Pool, IRule, Policy, Profile, VServer
 from lib.f5_api_reqs import get_vservers, get_pool, get_pool_members, get_irule, get_vserver_policies, get_vserver_profiles
 from nw_restapi.settings import config
+import time
 
 
 def get_create_pool_members_db(lb_ip, lb_id, pool_name):
@@ -107,7 +108,7 @@ def create_update_vs_table(lb_ip, lb_id):
                     if db_vserver.pool is None:
                         pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
                         db_vserver.pool_id = pool_id
-                    elif db.vserver.pool.name != pool_name:
+                    elif db_vserver.pool.name != pool_name:
                         pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
                         db_vserver.pool_id = pool_id
                 else:
@@ -162,3 +163,12 @@ def create_update_lb_table():
         else:
             create_update_vs_table(lb.ip_addr, lb.id)
         
+
+def main():
+    t1 = time.perf_counter()
+    create_update_lb_table()
+    print(round(time.perf_counter() - t1, 3))
+
+
+if __name__ == '__main__':
+    main()
