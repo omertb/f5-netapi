@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $vServersTable.bootstrapTable("destroy");
             $vServersTable.bootstrapTable({data: data});
             errorDiv.innerHTML = "";
-            errorDiv.removeAttribute("class")
+            errorDiv.removeAttribute("class");
         },
         error: function(data) {
             $vServersTable.bootstrapTable("destroy");
@@ -28,15 +28,16 @@ document.addEventListener("DOMContentLoaded", function() {
     // Initialize tooltips on the table
     var table = document.getElementById('vServersTable');
     
+    
     var tooltip = new bootstrap.Tooltip(table, {
         container: 'body',
         selector: '.tooltip-trigger'
     });
-    /*
+
     var popover = new bootstrap.Popover(table, {
         container: 'body',
         selector: '.popover-trigger',
         trigger: 'hover'
     });
-    */
+    
 });

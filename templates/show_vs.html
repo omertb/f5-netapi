@@ -28,18 +28,20 @@
         >
             <thead class="thead-dark">
             <tr>
-                <th scope="col" data-field="name" data-sortable="true" data-width="8" data-width-unit="%">VServer Name Count</th>
-                <th scope="col" data-field="ip_addr" data-sortable="true" data-width="4" data-width-unit="%">IP Address</th>
-                <th scope="col" data-field="port" data-sortable="true" data-width="2" data-width-unit="%">Port</th>
-                <th scope="col" data-field="nat" data-visible="true" data-width="4" data-width-unit="%">Nat Status</th>
-                <th scope="col" data-field="persistence" data-visible="true" data-width="4" data-width-unit="%">Persistence</th>
-                <th scope="col" data-field="irules" data-visible="true" data-width="8" data-width-unit="%">iRules</th>
-                <th scope="col" data-field="profiles" data-visible="true" data-width="4" data-width-unit="%">Profiles</th>
-                <th scope="col" data-field="policies" data-visible="true" data-width="4" data-width-unit="%">Policies</th>
-                <th scope="col" data-field="pool" data-visible="true" data-width="4" data-width-unit="%">Pool Name</th>
-                <th scope="col" data-field="lb_method" data-visible="true" data-width="4" data-width-unit="%">LB Method</th>
-                <th scope="col" data-field="monitor" data-visible="true" data-width="4" data-width-unit="%">Monitor</th>
-                <th scope="col" data-field="lb" data-visible="true" data-width="4" data-width-unit="%">LB Name</th>
+                <th scope="col" data-field="id" data-sortable="false" data-width="2" data-width-unit="%">ID</th>
+                <th scope="col" data-field="name" data-sortable="true" data-width="12" data-width-unit="%">VServer Name Count</th>
+                <th scope="col" data-field="ip_addr" data-sortable="true" data-width="6" data-width-unit="%">IP Address</th>
+                <th scope="col" data-field="port" data-sortable="true" data-width="4" data-width-unit="%">Port</th>
+                <th scope="col" data-field="pool" data-visible="false" data-width="8" data-width-unit="%">Pool Name</th>
+                <th class="members-cell" scope="col" data-field="members" data-visible="true" data-width="12" data-width-unit="%">Members</th>
+                <th scope="col" data-field="nat" data-visible="false" data-width="6" data-width-unit="%">Nat Status</th>
+                <th scope="col" data-field="persistence" data-visible="false" data-width="6" data-width-unit="%">Persistence</th>
+                <th class="irules-cell" scope="col" data-field="irules" data-visible="true" data-width="12" data-width-unit="%">iRules</th>
+                <th scope="col" data-field="profiles" data-visible="false" data-width="6" data-width-unit="%">Profiles</th>
+                <th scope="col" data-field="policies" data-visible="false" data-width="6" data-width-unit="%">Policies</th>
+                <th scope="col" data-field="lb_method" data-visible="false" data-width="8" data-width-unit="%">LB Method</th>
+                <th scope="col" data-field="monitor" data-visible="false" data-width="6" data-width-unit="%">Monitor</th>
+                <th scope="col" data-field="lb" data-visible="true" data-width="6" data-width-unit="%">LB Name</th>
             </tr>
             </thead>
             <tbody id="vServersTableBody"></tbody>

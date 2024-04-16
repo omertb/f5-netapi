@@ -56,15 +56,13 @@
     white-space: pre-wrap;
 }
 
-.popover-title {
-    font-size: smaller;
-}   
  
 .custom-popover {
-    --bs-popover-max-width: 600px;
+    --bs-popover-max-width: 276px;
+    --bs-popover-font-size: small;
 }
 
 .popover-trigger {
     text-decoration: none;
-    color: brown;
+    color: rgb(224, 73, 73);
 }

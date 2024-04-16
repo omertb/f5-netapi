@@ -299,6 +299,7 @@ def virtuals(request):
     response_json = []
     for db_vserver in db_vservers:
         vserver_dict = {
+            'id': db_vserver.id,
             'lb': db_vserver.lb.name,
             'name' : db_vserver.name,
             'ip_addr': db_vserver.ip_addr,
@@ -319,11 +320,44 @@ def virtuals(request):
                     'session': member['session']
                 } for member in db_vserver.pool.member.values()
             ]
+            member_html_list = []
+            for member in vserver_dict['pool_members']:
+                member_html = f"""
+                    <a href="#" 
+                        class="popover-trigger" 
+                        data-bs-custom-class="custom-popover" 
+                        data-bs-toggle="popover" 
+                        data-bs-trigger="hover" 
+                        data-bs-placement="auto" 
+                        data-bs-html="true" 
+                        data-bs-title="{member['name']}"
+                        data-bs-content='
+                        <div class="row">
+                            <div class="row">
+                                <div class="col-6"><strong>IP:</strong></div>
+                                <div class="col-6">{member['ip_addr']}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6"><strong>Port:</strong></div>
+                                <div class="col-6">{member['port']}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6"><strong>State:</strong></div>
+                                <div class="col-6">{member['state']}</div>
+                            </div>
+                        </div>
+                        '>
+                        {member['name']}
+                    </a>
+                """
+                member_html_list.append(member_html)
+            vserver_dict['members'] = ', '.join(member_html_list)
         else:
             vserver_dict['pool'] = None
             vserver_dict['lb_method'] = None
             vserver_dict['monitor'] = None
             vserver_dict['pool_members'] = None
+            vserver_dict['members'] = None
         irules = [{irule['name']: irule['content']} for irule in db_vserver.irule.values()]
         irules_html_list = []
         for irule in irules:
