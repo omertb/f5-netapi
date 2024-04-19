@@ -29,8 +29,8 @@ def vs_page(request):
     for lb_name, lb_addr in config['F5_LB_LIST'].items():
         load_balancers[lb_name.upper()] = lb_addr
     if request.method == "POST":
-        ValidIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-        ValidPortRegex = "^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
+        ValidIpAddressRegex = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+        ValidPortRegex = r"^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         errors = []
         success = []
         # get form values
@@ -49,6 +49,7 @@ def vs_page(request):
         svc_proto = request.POST.get("serviceProtoSelect")
         lb_method = request.POST.get("lbMethodSelect")
         persistence = request.POST.get("persistenceSelect")
+        lb_desc = request.POST.get("lbDescription")
         if persistence == "none":
             persistence = None
 
@@ -57,6 +58,7 @@ def vs_page(request):
         lb_addr = request.POST.get("vsLoadBalancerSelect")
 
         # Validations
+        valid_str_re = r"^[A-Za-z0-9_\.\-]+$"
         if config_type == "waf":
             if not (vs_name and vs_ip and waf_svc_ip and waf_return_ip and svc_ip_list and svc_port_list and ssl_profile):
                 return render(request, 'create_vs.html', {'errors': ["All fields are required!"], 'load_balancers': load_balancers})
@@ -80,6 +82,10 @@ def vs_page(request):
         for svc_port in svc_port_list:
             if not re.search(ValidPortRegex, svc_port):
                 errors.append(f"Invalid Port Number : {svc_port}")
+        if not re.compile(valid_str_re).match(lb_desc):
+            errors.append("Failed for LB Description: Valid Characters: A-Z, a-z, 0-9, -(dash), _(underscore) and .(dot)")
+        if not re.compile(valid_str_re).match(vs_name):
+            errors.append("Failed for VS Name : Valid Characters: A-Z, a-z, 0-9, -(dash), _(underscore) and .(dot)")
         if errors:
             return render(request, 'create_vs.html', {'errors': errors, 'load_balancers': load_balancers})
         
@@ -161,7 +167,7 @@ def vs_page(request):
             ]
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {waf_ret_vs_name} already exists"
@@ -189,7 +195,7 @@ def vs_page(request):
             profiles = [
                 { "name": "/Common/http_common", "context": "all" }
             ]
-            response = f5_create_vs(lb_addr, username, password, http80_vs_name, dest_ip, pool_name, profiles, irule)
+            response = f5_create_vs(lb_addr, username, password, http80_vs_name, dest_ip, pool_name, profiles, irule, lb_desc)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {http80_vs_name} already exists"
@@ -231,7 +237,7 @@ def vs_page(request):
                 irule = "irule_ins_client_XFF"
                 snat = "automap"
                 pool_name = svc_pool_name
-            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {ssl_vs_name} already exists"
@@ -268,7 +274,7 @@ def vs_page(request):
                 profiles.append({ "name": "/Common/qradar", "context": "all" })
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {nonssl_vs_name} already exists"

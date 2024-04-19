@@ -31,11 +31,12 @@ def f5_api_request(method, api_url, user, password, data=None):
         return None
 
 
-def f5_create_vs(host, user, passwd, vs_name, vs_ip, pool_name, profiles, irule, snat="none", persistence=None):
+def f5_create_vs(host, user, passwd, vs_name, vs_ip, pool_name, profiles, irule, descr, snat="none", persistence=None):
     create_vs_api_url = f"https://{host}/mgmt/tm/ltm/virtual"
     payload = {
         "name": vs_name,
         "destination": vs_ip,
+        "description": descr,
         "ipProtocol": "tcp",
         "sourceAddressTranslation": { "type": snat },
         "profiles": profiles

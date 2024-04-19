@@ -28,6 +28,7 @@ function submitForm(){
             servPort: [],
             persistenceSelect: document.getElementById("persistenceSelect").value,
             lbMethodSelect: document.getElementById("lbMethodSelect").value,
+            lbDescription: document.getElementById("lbDescription").value,
             adUser: document.getElementById("adUser").value
         };
         // Get all input values
@@ -145,6 +146,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("serviceCountDisplay").innerHTML = formData.serviceCountSlide;  
         document.getElementById("persistenceSelect").value = formData.persistenceSelect;
         document.getElementById("lbMethodSelect").value = formData.lbMethodSelect;
+        document.getElementById("lbDescription").value = formData.lbDescription;
         document.getElementById("adUser").value = formData.adUser;
         const serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
         // Populate the form fields with stored data

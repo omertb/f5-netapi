@@ -200,7 +200,7 @@
                                     <option value="none">None</option>
                                 </select>
                             </div>
-                            <div class="col-md-4"></div>
+                            
                             <div class="col-md-4">
                                 <label for="lbMethodSelect" class="form-label" style="font-size: 14px;">LB Method:</label>
                                 <select class="form-select form-select-sm" name="lbMethodSelect" id="lbMethodSelect" aria-label="Select Load Balancing Method">
@@ -208,6 +208,10 @@
                                     <option value="least-connections-member">Least Connections</option>
                                     <option value="fastest-app-response">Least Response Time</option>
                                 </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lbDescription" class="form-label" style="font-size: 14px;">Description:</label>
+                                <input type="text" class="form-control form-control-sm" name="lbDescription" id="lbDescription" placeholder="Team Code" required>
                             </div>
                         </div>
 
