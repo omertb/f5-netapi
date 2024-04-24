@@ -99,8 +99,11 @@ def create_vserver_profiles_db(lb_ip, lb_id, vs_name):
 
 def create_update_vs_table(lb_ip, lb_id):
     vservers = get_vservers(lb_ip)
+    db_vservers = VServer.objects.filter(lb_id=lb_id)
     if vservers is not None:
+        f5_vserver_lb_list = []
         for vserver in vservers:
+            f5_vserver_lb_list.append(f"{vserver['name']}-{lb_ip}")
             VS_EXISTS = VServer.objects.filter(name=vserver['name'], lb_id=lb_id)
             if VS_EXISTS:
                 db_vserver = VS_EXISTS.get()  # convert queryset to single item
@@ -167,6 +170,10 @@ def create_update_vs_table(lb_ip, lb_id):
             db_vserver.profile.set(profiles)
 
             db_vserver.save()
+        for db_vserver in db_vservers:
+            vserver_lb_ip = f"{db_vserver.name}-{db_vserver.lb.ip_addr}"
+            if vserver_lb_ip not in f5_vserver_lb_list:
+                db_vserver.delete()
             
 
 def create_update_lb_table():

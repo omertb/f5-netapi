@@ -10,6 +10,7 @@ from . models import VServer
 from django.http import JsonResponse
 from django.template.defaultfilters import escape
 from django.utils.safestring import mark_safe
+from django.db.utils import OperationalError
 
 
 logger = logging.getLogger(__name__)
@@ -301,8 +302,9 @@ def vs_page(request):
 
 
 def virtuals(request):
-    db_vservers = VServer.objects.all()
     response_json = []
+    db_vservers = VServer.objects.all()
+
     for db_vserver in db_vservers:
         vserver_dict = {
             'id': db_vserver.id,
@@ -365,7 +367,8 @@ def virtuals(request):
             vserver_dict['monitor'] = None
             vserver_dict['pool_members'] = None
             vserver_dict['members'] = None
-        irules = [{irule['name']: irule['content']} for irule in db_vserver.irule.values()]
+        db_vserver_irules = db_vserver.irule.values()
+        irules = [{irule['name']: irule['content']} for irule in db_vserver_irules]
         irules_html_list = []
         for irule in irules:
             irule_html = f"""
@@ -383,8 +386,10 @@ def virtuals(request):
             #irule_html = f'<a href="#" class="popover-trigger" data-bs-custom-class="custom-popover" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="auto" data-bs-html="true" data-bs-title="iRule Code" data-bs-content="{escape(list(irule.values())[0])}">{list(irule.keys())[0]}</a>'
             irules_html_list.append(irule_html)
         vserver_dict['irules'] = ', '.join(irules_html_list)
-        vserver_dict['policies'] = ', '.join([policy['name'] for policy in db_vserver.policy.values()])
-        vserver_dict['profiles'] = ', '.join([profile['name'] for profile in db_vserver.profile.values()])
+        db_vserver_policies = db_vserver.policy.values()
+        db_vserver_profiles = db_vserver.profile.values()
+        vserver_dict['policies'] = ', '.join([policy['name'] for policy in db_vserver_policies])
+        vserver_dict['profiles'] = ', '.join([profile['name'] for profile in db_vserver_profiles])
         response_json.append(vserver_dict)
     return JsonResponse(response_json, safe=False)
 
