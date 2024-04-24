@@ -311,7 +311,8 @@ def virtuals(request):
             'ip_addr': db_vserver.ip_addr,
             'port': db_vserver.port,
             'nat': db_vserver.nat,
-            'persistence': db_vserver.persistence
+            'persistence': db_vserver.persistence,
+            'description': db_vserver.description
         }
         if db_vserver.pool is not None:
             vserver_dict['pool'] = db_vserver.pool.name

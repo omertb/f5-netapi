@@ -2,6 +2,7 @@ from vs_ops.models import LoadBalancer, Member, Pool, IRule, Policy, Profile, VS
 from lib.f5_api_reqs import get_vservers, get_pool, get_pool_members, get_irule, get_vserver_policies, get_vserver_profiles
 from nw_restapi.settings import config
 import time
+from datetime import datetime
 
 
 def get_create_pool_members_db(lb_ip, lb_id, pool_name):
@@ -103,16 +104,37 @@ def create_update_vs_table(lb_ip, lb_id):
             VS_EXISTS = VServer.objects.filter(name=vserver['name'], lb_id=lb_id)
             if VS_EXISTS:
                 db_vserver = VS_EXISTS.get()  # convert queryset to single item
-                if 'pool' in vserver:
-                    pool_name = vserver['pool'].split('/')[-1]
-                    if db_vserver.pool is None:
-                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
-                        db_vserver.pool_id = pool_id
-                    elif db_vserver.pool.name != pool_name:
-                        pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
-                        db_vserver.pool_id = pool_id
-                else:
-                    db_vserver.pool = None
+                db_last_modified = db_vserver.last_modified
+                api_last_modified = datetime.fromisoformat(vserver['lastModifiedTime'])
+                if db_last_modified != api_last_modified:
+                    if 'pool' in vserver:
+                        pool_name = vserver['pool'].split('/')[-1]
+                        if db_vserver.pool is None:
+                            pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
+                            db_vserver.pool_id = pool_id
+                        elif db_vserver.pool.name != pool_name:
+                            pool_id = get_create_vserver_pool_db(lb_ip, lb_id, pool_name)
+                            db_vserver.pool_id = pool_id
+                        else:
+                            pool_id = db_vserver.pool_id
+                    else:
+                        pool_id = None
+                    #
+                    vsip, vsport = vserver['destination'].split('/')[-1].split(':')
+                    vserver_db_values = {
+                        'name': vserver['name'],
+                        'ip_addr': vsip,
+                        'port': vsport,
+                        'nat': vserver['sourceAddressTranslation']['type'],
+                        'persistence': ', '.join([persistence['name'] for persistence in vserver['persist']]) if 'persist' in vserver else None,
+                        'lb_id': lb_id,
+                        'pool_id': pool_id,
+                        'description': vserver['description'] if 'description' in vserver else None,
+                        'last_modified': vserver['lastModifiedTime']
+                    }
+                    for key, value in vserver_db_values.items():
+                        setattr(db_vserver, key, value)
+                    db_vserver.save()         
             else:
                 vsip, vsport = vserver['destination'].split('/')[-1].split(':')
                 if 'pool' in vserver:
@@ -127,7 +149,9 @@ def create_update_vs_table(lb_ip, lb_id):
                     'nat': vserver['sourceAddressTranslation']['type'],
                     'persistence': ', '.join([persistence['name'] for persistence in vserver['persist']]) if 'persist' in vserver else None,
                     'lb_id': lb_id,
-                    'pool_id': pool_id
+                    'pool_id': pool_id,
+                    'description': vserver['description'] if 'description' in vserver else None,
+                    'last_modified': vserver['lastModifiedTime']
                 }
                 db_vserver = VServer(**vserver_db_values)
                 db_vserver.save()

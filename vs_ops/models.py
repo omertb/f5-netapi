@@ -80,11 +80,13 @@ class VServer(models.Model):
     port =models.CharField(max_length=5, null=True)
     nat = models.CharField(max_length=32, null=True)
     persistence = models.CharField(max_length=32, null=True)
+    description = models.CharField(max_length=32, null=True)
     lb = models.ForeignKey(LoadBalancer, on_delete=models.CASCADE)
     pool = models.ForeignKey(Pool, null=True, on_delete=models.SET_NULL)
     irule = models.ManyToManyField(IRule, blank=True, related_name="bound_vservers")
     policy = models.ManyToManyField(Policy, blank=True, related_name="bound_vservers")
     profile = models.ManyToManyField(Profile, blank=True, related_name="bound_vservers")
+    last_modified = models.DateTimeField(null=True)
 
     class Meta:
         unique_together = (("name", "lb"),)
