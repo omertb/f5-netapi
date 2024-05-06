@@ -13,6 +13,11 @@ def get_create_pool_members_db(lb_ip, lb_id, pool_name):
     for member in pool_members:
         try:
             db_member = Member.objects.get(name=member['name'], pool_name=pool_name, lb_id=lb_id)
+            # update member in db
+            db_member.state = member['state']
+            db_member.monitor = member['monitor']
+            db_member.session = member['session']
+            db_member.save()
             current_members.append(db_member)
         except Member.DoesNotExist:
             member_db_values = {
@@ -108,7 +113,7 @@ def create_update_vs_table(lb_ip, lb_id):
             if VS_EXISTS:
                 db_vserver = VS_EXISTS.get()  # convert queryset to single item
                 db_last_modified = db_vserver.last_modified
-                api_last_modified = datetime.fromisoformat(vserver['lastModifiedTime'])
+                api_last_modified = datetime.fromisoformat(vserver['lastModifiedTime'].replace('Z', '+00:00'))
                 if db_last_modified != api_last_modified:
                     if 'pool' in vserver:
                         pool_name = vserver['pool'].split('/')[-1]

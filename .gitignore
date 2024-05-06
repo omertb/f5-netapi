@@ -7,3 +7,5 @@ media
 migrations
 static/images
 venv
+db_reset.sh
+db_update.sh
