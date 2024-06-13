@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg mb-4" style="background-color: #e3f2fd;">
     <div class="container">
       
-      <a class="navbar-brand" href="#">Net Api</a>
+      <a class="navbar-brand" href="#">F5 Ops</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -12,13 +12,16 @@
 
                 <ul class="navbar-nav">
                   <li class="nav-item {% if '/cache/' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
-                    <a class="nav-link {% if '/cache/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'cache_page' %}">F5 Cache</a>
+                    <a class="nav-link {% if '/cache/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'cache_page' %}">Cache</a>
                   </li>
                   <li class="nav-item {% if '/cert/' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
-                    <a class="nav-link {% if '/cert/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'cert_page' %}">F5 Cert Upload</a>
+                    <a class="nav-link {% if '/cert/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'cert_page' %}">Cert Upload</a>
                   </li>
                   <li class="nav-item {% if '/vs/' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
-                    <a class="nav-link {% if '/vs/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'vs_page' %}">Create Virtual Server</a>
+                    <a class="nav-link {% if '/vs/' == request.path %} active {% endif %}" aria-current="page" href="{% url 'vs_page' %}">Create VServer</a>
+                  </li>
+                  <li class="nav-item {% if '/vs/show' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
+                    <a class="nav-link {% if '/vs/show' == request.path %} active {% endif %}" aria-current="page" href="{% url 'show_vs' %}">Show VServers</a>
                   </li>
                 </ul>
               
