@@ -42,7 +42,7 @@ DEBUG = True
 
 
 SERVER_IP = config.get('COMMON', 'server_ip')
-ALLOWED_HOSTS = ['127.0.0.1', SERVER_IP]
+ALLOWED_HOSTS = ['127.0.0.1', SERVER_IP, '10.70.110.126']
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
 

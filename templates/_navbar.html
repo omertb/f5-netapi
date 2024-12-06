@@ -23,6 +23,9 @@
                   <li class="nav-item {% if '/vs/show' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
                     <a class="nav-link {% if '/vs/show' == request.path %} active {% endif %}" aria-current="page" href="{% url 'show_vs' %}">Show VServers</a>
                   </li>
+                  <li class="nav-item {% if '/vs/member_states_diff' == request.path %} bg-success text-dark bg-opacity-50 {% endif %}">
+                    <a class="nav-link {% if '/vs/member_states_diff' == request.path %} active {% endif %}" aria-current="page" href="{% url 'member_states_diff' %}">State Differences</a>
+                  </li>
                 </ul>
               
 

@@ -2,12 +2,13 @@ from django.shortcuts import render
 import json
 from lib.f5_api_reqs import f5_custom_create_vs, f5_custom_create_pool
 from lib.f5_api_reqs import f5_create_vs, f5_create_pool
+from lib.check_monitor_status import get_diff_states
 import re
 import time
 from nw_restapi.settings import config
 import logging
 from . models import VServer
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from django.template.defaultfilters import escape
 from django.utils.safestring import mark_safe
 from django.db.utils import OperationalError
@@ -164,11 +165,21 @@ def vs_page(request):
             snat = "automap"
             profiles = [
                 { "name": "/Common/tcp", "context": "all" },
-                { "name": "/Common/http", "context": "all" }
+                { "name": "/Common/http", "context": "all" },
+                { "name": "/Common/oneconnect_prefix32", "context": "all" }
             ]
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, persistence)
+
+            # modify persistence
+            if persistence == "persist_cookie":
+                modified_persistence = "persist_cookie_ssl_waf"
+            elif persistence == "source_addr":
+                modified_persistence = "persist_xff_uie_3600s"
+            else:
+                modified_persistence = "none"
+
+            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {waf_ret_vs_name} already exists"
@@ -226,7 +237,9 @@ def vs_page(request):
                 { "name": "/Common/http_common", "context": "all" },
                 { "name": f"/Common/{ssl_profile}", "context": "clientside" },
                 { "name": "/Common/webaccel_common", "context": "all" },
-                { "name": "/Common/qradar", "context": "all" }
+                { "name": "/Common/httpcompression", "context": "all" },
+                { "name": "/Common/qradar", "context": "all" },
+                { "name": "/Common/oneconnect_prefix32", "context": "all" }
             ]
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
@@ -238,7 +251,16 @@ def vs_page(request):
                 irule = "irule_ins_client_XFF"
                 snat = "automap"
                 pool_name = svc_pool_name
-            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, persistence)
+
+            # modify persistence
+            if persistence == "persist_cookie":
+                modified_persistence = "persist_cookie_ssl"
+            elif persistence == "source_addr":
+                modified_persistence = "persist_xff_uie_3600s"
+            else:
+                modified_persistence = "none"
+            
+            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, modified_persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {ssl_vs_name} already exists"
@@ -266,16 +288,27 @@ def vs_page(request):
             irule = None
             snat = "automap"
             profiles = [
-                { "name": "/Common/tcp", "context": "all" }
+                { "name": "/Common/tcp", "context": "all" },
+                { "name": "/Common/oneconnect_prefix32", "context": "all" }
             ]
+            modified_persistence = persistence
             if config_type == "http":
+
+                # modify persistence
+                if persistence == "persist_cookie":
+                    modified_persistence = "persist_cookie_ssl"
+                elif persistence == "source_addr":
+                    modified_persistence = "persist_xff_uie_3600s"
+                else:
+                    modified_persistence = "none"
+                
                 irule = "irule_ins_client_XFF"
                 profiles.append({ "name": "/Common/http_common", "context": "all" })
                 profiles.append({ "name": "/Common/webaccel_common", "context": "all" })
                 profiles.append({ "name": "/Common/qradar", "context": "all" })
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, persistence)
+            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
             if response is not None:
                 if response.status_code == 409:
                     msg = f"Virtual Server {nonssl_vs_name} already exists"
@@ -395,3 +428,16 @@ def virtuals(request):
 
 def show_vs(request):
     return render(request, 'show_vs.html')
+
+def retrieve_member_states(request):
+    # return table data in json format
+    client_ip = get_client_ip(request)
+    member_states = get_diff_states()
+    if member_states is None:
+        logger.info('Get member states returned None!')
+        HttpResponseServerError(f"{client_ip} - Get member states returned None!")
+    else:
+        return JsonResponse(member_states, safe=False)
+
+def member_states_diff(request):
+    return render(request, 'member_states.html')

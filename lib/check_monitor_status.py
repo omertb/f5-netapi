@@ -87,7 +87,7 @@ def get_diff_states():
                         node2_members_status[f"{lb_name}--{member_item['name']}"] = member_item['state']
 
 
-    members_with_diff_states = {}
+    members_with_diff_states = []
     members = list(zip(node1_members_status.items(), node2_members_status.items()))
     for member in members:
         if member[0][0] != member[1][0]:
@@ -96,19 +96,20 @@ def get_diff_states():
         else:
             if member[0][1] != member[1][1]:
                 lb_name, member_name = member[0][0].split('--')
-                members_with_diff_states[member_name] = {
+                members_with_diff_states.append({
+                    'name': member_name,
                     'node1_state': member[0][1].upper(),
                     'node2_state': member[1][1].upper(),
                     'lb_name': lb_name
-                }
+                })
     return members_with_diff_states
 
 
 def main():
     members_with_diff_states = get_diff_states()
     if members_with_diff_states is not None:
-        for member, properties in members_with_diff_states.items():
-            print(f"{member:<30} Node1: {properties['node1_state']:<12} Node2: {properties['node2_state']:<12} LB: {properties['lb_name']}")
+        for member in members_with_diff_states:
+            print(f"{member['name']:<30} Node1: {member['node1_state']:<12} Node2: {member['node2_state']:<12} LB: {member['lb_name']}")
 
 
 if __name__ == '__main__':
