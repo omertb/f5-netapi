@@ -67,12 +67,13 @@ def cert_page(request):
                 logger.info(f"{client_ip} - {username} - File: {certname} upload is FAILED.")
                 upload_result = "FAILED"
 
-            iresult = f5_import_pfx_cert(lb_addr, username, password, certname, pfx_passphrase)
+            iresult, result_text = f5_import_pfx_cert(lb_addr, username, password, certname, pfx_passphrase)
             if iresult == 200:
                 logger.info(f"{client_ip} - {username} - Pfx: {certname} import is successful.")
                 import_result = "Success"
             else:
                 logger.info(f"{client_ip} - {username} - Pfx: {certname} import FAILED.")
+                logger.info(result_text)
                 import_result = "FAILED"
 
             profile_name = re.sub(r'\.pfx$', '', certname)

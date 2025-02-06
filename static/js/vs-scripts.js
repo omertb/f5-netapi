@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function() {
             searchDatalist.append(`<option value="${option}">`);
         });
         errorDiv.innerHTML = "";
-        errorDiv.removeAttribute("class")
+        errorDiv.removeAttribute("class");
     })
     .catch(err => {
         $('#errorDiv').addClass('alert alert-danger');
@@ -249,7 +249,7 @@ loadBalancerSelect.addEventListener("change", function(){
             searchDatalist.append(`<option value="${option}">`);
         });
         errorDiv.innerHTML = "";
-        errorDiv.removeAttribute("class")
+        errorDiv.removeAttribute("class");
     })
     .catch(err => {
         $('#errorDiv').addClass('alert alert-danger');

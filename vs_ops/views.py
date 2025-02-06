@@ -177,7 +177,7 @@ def vs_page(request):
             elif persistence == "source_addr":
                 modified_persistence = "persist_xff_uie_3600s"
             else:
-                modified_persistence = "none"
+                modified_persistence = None
 
             response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
             if response is not None:
@@ -258,7 +258,7 @@ def vs_page(request):
             elif persistence == "source_addr":
                 modified_persistence = "persist_xff_uie_3600s"
             else:
-                modified_persistence = "none"
+                modified_persistence = None
             
             response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, modified_persistence)
             if response is not None:
@@ -300,7 +300,7 @@ def vs_page(request):
                 elif persistence == "source_addr":
                     modified_persistence = "persist_xff_uie_3600s"
                 else:
-                    modified_persistence = "none"
+                    modified_persistence = None
                 
                 irule = "irule_ins_client_XFF"
                 profiles.append({ "name": "/Common/http_common", "context": "all" })

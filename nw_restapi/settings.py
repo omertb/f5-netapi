@@ -38,11 +38,11 @@ CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = False  # change to True if behind ssl-proxy
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = False
 
 SERVER_IP = config.get('COMMON', 'server_ip')
-ALLOWED_HOSTS = ['127.0.0.1', SERVER_IP, '10.70.110.126']
+PROXY_IP = config.get('COMMON', 'proxy_ip')
+ALLOWED_HOSTS = ['127.0.0.1', SERVER_IP, PROXY_IP]
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1"]
 
 

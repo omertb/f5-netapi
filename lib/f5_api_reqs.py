@@ -5,6 +5,7 @@ import json
 import base64
 import os
 import time
+
 from nw_restapi.settings import MEDIA_ROOT
 
 from nw_restapi.settings import COMMON_CONFIG_FILE
@@ -141,7 +142,7 @@ def f5_import_pfx_cert(host, user, passwd, filename, passphrase):
         "passphrase": passphrase
         })
     response = f5_api_request("POST", upload_cert_api_url, user, passwd, data=payload)
-    return response.status_code
+    return response.status_code, response.text
 
 
 def f5_custom_import_pfx_cert(filename):
