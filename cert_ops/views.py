@@ -37,9 +37,9 @@ def cert_page(request):
                 msg = "File should be in pfx format!"
                 return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
             # check certificate name against valid characters
-            valid_str_re = "^[A-Za-z0-9_\.]+$"
+            valid_str_re = "^[A-Za-z0-9_\.\-]+$"
             if not re.compile(valid_str_re).match(certfile.name):
-                msg = "Failed : Valid Characters: A-Z, a-z, 0-9, _(underscore) and .(dot)"
+                msg = "Failed : Valid Characters: A-Z, a-z, 0-9, -(dash), _(underscore) and .(dot)"
                 return render(request, 'cert_upload.html', {'load_balancers': load_balancers, 'error': msg})
             
             lb_addr = request.POST.get('loadBalancerSelect')

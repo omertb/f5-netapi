@@ -107,7 +107,10 @@ def vs_page(request):
         if config_type == "waf":
             svc_pool_name = f"{vs_name}_ssl_waf"
         else:
-            svc_pool_name = f"{vs_name}_pool"
+            if vs_port == "80" or vs_port == "443":
+                svc_pool_name = f"{vs_name}_pool"
+            else:
+                svc_pool_name = f"{vs_name}_{vs_port}_pool"
         
         members = [f"{service}:{svc_port_list[idx]}" for idx, service in enumerate(svc_ip_list)]
         response = f5_create_pool(lb_addr, username, password, svc_pool_name, members, lb_method)
