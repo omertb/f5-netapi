@@ -4,14 +4,53 @@ $(document).on({
     ajaxStart: function() { $body.addClass("loading");    },
      ajaxStop: function() { $body.removeClass("loading"); }
 });
+/**
+let generateButton = document.getElementById("generateCommands");
 
+generateButton.addEventListener('click', function() {
+    let vsName = document.getElementById("vsName").value;
+    let vServerConfigSelect = document.getElementById("vServerConfigSelect").value;
+    let vsPort = document.getElementById("vsPort").value;
+    let searchContent = document.getElementById("searchContent").value;
+    let redirectHttpsCheck = document.getElementById("redirectHttpsCheck").value;
+    let redirectHttpsChecked = document.getElementById("redirectHttpsCheck").checked;
+    let vsIpAddr = document.getElementById("vsIpAddr").value;
+    let wafSvcIpAddr = document.getElementById("wafSvcIpAddr").value;
+    let wafRetIpAddr = document.getElementById("wafRetIpAddr").value;
+    let serviceProtoSelect = document.getElementById("serviceProtoSelect").value;
+    let serviceCountSlide = document.getElementById("serviceCountSlide").value;
+    let servIp = [];
+    let servPort = [];
+    let persistenceSelect = document.getElementById("persistenceSelect").value;
+    let lbMethodSelect = document.getElementById("lbMethodSelect").value;
+    let lbDescription = document.getElementById("lbDescription").value;
+
+    let serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
+
+    serviceBlocks.forEach(function(block) {
+        const servIpInput = block.querySelector('input[name="serv_ip[]"]');
+        const servPortInput = block.querySelector('input[name="serv_port[]"]');
+        servIp.push(servIpInput.value);
+        servPort.push(servPortInput.value);
+    });
+
+    if 
+
+})
+**/
+const genCommandsCheck = document.getElementById("genCommandsCheck");
+function submitFormGen(){
+    let form = document.getElementById("createVSForm");
+    genCommandsCheck.checked = true;
+    form.submit();
+}
 
 function submitForm(){
     // Save form data to sessionStorage on form submission
     // Get form data
     let form = document.getElementById("createVSForm");
     if (form.checkValidity()) {
-        const formData = {
+        let formData = {
             vsLoadBalancerSelect: document.getElementById("vsLoadBalancerSelect").value,
             vsName: document.getElementById("vsName").value,
             vServerConfigSelect: document.getElementById("vServerConfigSelect").value,
@@ -32,16 +71,17 @@ function submitForm(){
             adUser: document.getElementById("adUser").value
         };
         // Get all input values
-        const serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
+        let serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
         serviceBlocks.forEach(function(block) {
-            const servIpInput = block.querySelector('input[name="serv_ip[]"]');
-            const servPortInput = block.querySelector('input[name="serv_port[]"]');
+            let servIpInput = block.querySelector('input[name="serv_ip[]"]');
+            let servPortInput = block.querySelector('input[name="serv_port[]"]');
             formData.servIp.push(servIpInput.value);
             formData.servPort.push(servPortInput.value);
             });
 
         // Save form data to sessionStorage
         sessionStorage.setItem("formData", JSON.stringify(formData));
+        genCommandsCheck.checked = false;
         form.submit();
         $(".loading-icon").removeClass("visually-hidden");
         $("#createVSForm").attr("disabled", true);
@@ -148,11 +188,11 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("lbMethodSelect").value = formData.lbMethodSelect;
         document.getElementById("lbDescription").value = formData.lbDescription;
         document.getElementById("adUser").value = formData.adUser;
-        const serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
+        let serviceBlocks = document.querySelectorAll('[id^="serviceBlock"]');
         // Populate the form fields with stored data
         serviceBlocks.forEach(function(block, index) {
-            const servIpInput = block.querySelector('input[name="serv_ip[]"]');
-            const servPortInput = block.querySelector('input[name="serv_port[]"]');
+            let servIpInput = block.querySelector('input[name="serv_ip[]"]');
+            let servPortInput = block.querySelector('input[name="serv_port[]"]');
             if (formData.servIp && formData.servIp[index]) {
                 servIpInput.value = formData.servIp[index];
             }
@@ -177,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#wafSvcIpDiv').show();
             $('#wafRetIpDiv').show();
 
-        } else if (formData.vServerConfigSelect == "http" || answer == "tcp") {
+        } else if (formData.vServerConfigSelect == "http" || formData.vServerConfigSelect == "tcp") {
             $('#sslProfileDiv').hide();
             $('#redirectHttpsCheckDiv').hide();
             $('#wafSvcIpDiv').hide();

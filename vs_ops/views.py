@@ -1,7 +1,7 @@
 from django.shortcuts import render
 import json
 from lib.f5_api_reqs import f5_custom_create_vs, f5_custom_create_pool
-from lib.f5_api_reqs import f5_create_vs, f5_create_pool
+from lib.f5_api_reqs import f5_create_vs, f5_create_pool, f5_save_sys_config
 from lib.check_monitor_status import get_diff_states
 import re
 import time
@@ -31,10 +31,14 @@ def vs_page(request):
     for lb_name, lb_addr in config['F5_LB_LIST'].items():
         load_balancers[lb_name.upper()] = lb_addr
     if request.method == "POST":
+        config_check = request.POST.get("genCommandsCheck")
+        #logger.info(f"config_check: {str(config_checkbox)}, {type(config_checkbox)}")
+        #return render(request, 'create_vs.html', {'errors': ['tugrul test'], 'load_balancers': load_balancers})
         ValidIpAddressRegex = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
         ValidPortRegex = r"^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$"
         errors = []
         success = []
+        commands = []
         # get form values
         vs_name = request.POST.get("vsName")
         config_type = request.POST.get("vServerConfigSelect")
@@ -113,53 +117,75 @@ def vs_page(request):
                 svc_pool_name = f"{vs_name}_{vs_port}_pool"
         
         members = [f"{service}:{svc_port_list[idx]}" for idx, service in enumerate(svc_ip_list)]
-        response = f5_create_pool(lb_addr, username, password, svc_pool_name, members, lb_method)
-        client_ip = get_client_ip(request)
-        if response is not None:
-            if response.status_code == 409:
-                msg = f"Pool {svc_pool_name} already exists"
-                logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
-                errors.append(msg)
-            elif response.status_code == 200:
-                msg = f"Pool {svc_pool_name} is created."
-                logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
-                success.append(msg)
+        
+        if config_check is None:
+            response = f5_create_pool(lb_addr, username, password, svc_pool_name, members, lb_method)
+            client_ip = get_client_ip(request)
+            if response is not None:
+                if response.status_code == 409:
+                    msg = f"Pool {svc_pool_name} already exists"
+                    logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
+                    errors.append(msg)
+                elif response.status_code == 200:
+                    msg = f"Pool {svc_pool_name} is created."
+                    logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
+                    success.append(msg)
+                else:
+                    msg = f"Failed to create {svc_pool_name}; Response Code: {response.status_code}, {response.text}"
+                    logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
+                    errors.append(msg)
             else:
-                msg = f"Failed to create {svc_pool_name}; Response Code: {response.status_code}, {response.text}"
+                msg = f"Unknown error for creating pool {svc_pool_name}"
                 logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
                 errors.append(msg)
-        else:
-            msg = f"Unknown error for creating pool {svc_pool_name}"
-            logger.info(f"{client_ip} - {username} - Creating service pool response: {msg}")
-            errors.append(msg)
-        if errors:
-            return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+            if errors:
+                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+        
+        else:  # config_check
+            members_str = ""
+            for member in members:
+                member_ip, member_port = member.split(":")
+                members_str += f" {member_ip}:{member_port} {{ address {member_ip} }}"
+            commands.append(" # Services Pool Command:")
+            commands.append(f"create ltm pool {svc_pool_name} {{  load-balancing-mode {lb_method}  members add {{ {members_str} }}  monitor tcp }}")
+
 
         if config_type == "waf":
             # create WAF Service Pool
             waf_pool_name = f"{vs_name}_ssl"
             members = [f"{waf_svc_ip}:80"]
             waf_lb_method = "round-robin"
-            response = f5_create_pool(lb_addr, username, password, waf_pool_name, members, waf_lb_method)
-            if response is not None:
-                if response.status_code == 409:
-                    msg = f"Pool {waf_pool_name} already exists"
-                    logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
-                    errors.append(msg)
-                elif response.status_code == 200:
-                    msg = f"Pool {waf_pool_name} is created."
-                    logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
-                    success.append(msg)
+
+            if config_check is None:
+                response = f5_create_pool(lb_addr, username, password, waf_pool_name, members, waf_lb_method)
+                if response is not None:
+                    if response.status_code == 409:
+                        msg = f"Pool {waf_pool_name} already exists"
+                        logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
+                        errors.append(msg)
+                    elif response.status_code == 200:
+                        msg = f"Pool {waf_pool_name} is created."
+                        logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
+                        success.append(msg)
+                    else:
+                        msg = f"Failed to create pool {waf_pool_name}; Response Code: {response.status_code}, {response.text}"
+                        logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
+                        errors.append(msg)
                 else:
-                    msg = f"Failed to create pool {waf_pool_name}; Response Code: {response.status_code}, {response.text}"
+                    msg = f"Unknown error for creating pool {waf_pool_name}"
                     logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
                     errors.append(msg)
+                if errors:
+                    return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+            
             else:
-                msg = f"Unknown error for creating pool {waf_pool_name}"
-                logger.info(f"{client_ip} - {username} - Creating waf pool response: {msg}")
-                errors.append(msg)
-            if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+                members_str = ""
+                for member in members:
+                    member_ip, member_port = member.split(":")
+                    members_str += f" {member_ip}:{member_port} {{ address {member_ip} }}"
+                commands.append(" # Waf Pool Command:")
+                commands.append(f"create ltm pool {waf_pool_name} {{  load-balancing-mode {waf_lb_method}  members add {{ {members_str} }}  monitor tcp }}")
+
             
             # waf return virtual server
             waf_ret_vs_name = f"{vs_name}_ssl_waf"
@@ -181,25 +207,36 @@ def vs_page(request):
                 modified_persistence = "persist_xff_uie_3600s"
             else:
                 modified_persistence = None
-
-            response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
-            if response is not None:
-                if response.status_code == 409:
-                    msg = f"Virtual Server {waf_ret_vs_name} already exists"
-                    logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
-                    errors.append(msg)
-                elif response.status_code == 200:
-                    msg = f"Virtual Server {waf_ret_vs_name} is created."
-                    logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
-                    success.append(msg)
+            
+            if config_check is None:
+                response = f5_create_vs(lb_addr, username, password, waf_ret_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
+                if response is not None:
+                    if response.status_code == 409:
+                        msg = f"Virtual Server {waf_ret_vs_name} already exists"
+                        logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
+                        errors.append(msg)
+                    elif response.status_code == 200:
+                        msg = f"Virtual Server {waf_ret_vs_name} is created."
+                        logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
+                        success.append(msg)
+                    else:
+                        msg = f"Failed to create VS {waf_ret_vs_name}; Response Code: {response.status_code}, {response.text}"
+                        logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
+                        errors.append(msg)
                 else:
-                    msg = f"Failed to create VS {waf_ret_vs_name}; Response Code: {response.status_code}, {response.text}"
+                    msg = f"Unknown error for creating VS {waf_ret_vs_name}"
                     logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
                     errors.append(msg)
-            else:
-                msg = f"Unknown error for creating VS {waf_ret_vs_name}"
-                logger.info(f"{client_ip} - {username} - Creating waf return VS Response: {msg}")
-                errors.append(msg)
+            
+            else:  # config_check
+                commands.append(" # Waf Return Vserver Command:")
+                commands.append(f"create ltm virtual {waf_ret_vs_name} {{ description {lb_desc} "\
+                                f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                f"persist replace-all-with {{ {modified_persistence} {{ default yes }} }} "\
+                                f"pool {svc_pool_name} profiles add {{ http {{ }} oneconnect_prefix32 {{ }} "\
+                                f"tcp {{ }} }} rules {{ irule_ins_client_XFF }} "\
+                                f"serverssl-use-sni disabled source 0.0.0.0/0 source-address-translation {{ type automap  }} "\
+                                f"translate-address enabled translate-port enabled }}")
         
         # create a http virtual server to redirect to https
         if redirect_https == "yes":
@@ -210,26 +247,35 @@ def vs_page(request):
             profiles = [
                 { "name": "/Common/http_common", "context": "all" }
             ]
-            response = f5_create_vs(lb_addr, username, password, http80_vs_name, dest_ip, pool_name, profiles, irule, lb_desc)
-            if response is not None:
-                if response.status_code == 409:
-                    msg = f"Virtual Server {http80_vs_name} already exists"
-                    logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
-                    errors.append(msg)
-                elif response.status_code == 200:
-                    msg = f"Virtual Server {http80_vs_name} is created."
-                    logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
-                    success.append(msg)
+            if config_check is None:
+                response = f5_create_vs(lb_addr, username, password, http80_vs_name, dest_ip, pool_name, profiles, irule, lb_desc)
+                if response is not None:
+                    if response.status_code == 409:
+                        msg = f"Virtual Server {http80_vs_name} already exists"
+                        logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
+                        errors.append(msg)
+                    elif response.status_code == 200:
+                        msg = f"Virtual Server {http80_vs_name} is created."
+                        logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
+                        success.append(msg)
+                    else:
+                        msg = f"Failed to create VS {http80_vs_name}; Response Code: {response.status_code}, {response.text}"
+                        logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
+                        errors.append(msg)
                 else:
-                    msg = f"Failed to create VS {http80_vs_name}; Response Code: {response.status_code}, {response.text}"
+                    msg = f"Unknown error for creating VS {http80_vs_name}"
                     logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
                     errors.append(msg)
-            else:
-                msg = f"Unknown error for creating VS {http80_vs_name}"
-                logger.info(f"{client_ip} - {username} - Creating http-to-https VS Response: {msg}")
-                errors.append(msg)
-            if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+                if errors:
+                    return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+            else:  # config_check
+                commands.append(" # Http Vserver Command:")
+                commands.append(f"create ltm virtual {http80_vs_name} {{ description {lb_desc} "\
+                                f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                f"profiles add {{ http_common {{ }} "\
+                                f"tcp {{ }} }} rules {{ _sys_https_redirect }} "\
+                                f"serverssl-use-sni disabled source 0.0.0.0/0 "\
+                                f"translate-address enabled translate-port enabled }}")
         
         # create ssl virtual server
         if config_type == "waf" or config_type == "ssl":
@@ -244,15 +290,14 @@ def vs_page(request):
                 { "name": "/Common/qradar", "context": "all" },
                 { "name": "/Common/oneconnect_prefix32", "context": "all" }
             ]
+            snat = "automap"
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
             if config_type == "waf":
                 irule = "irule_backup_vs"
-                snat = "none"
                 pool_name = waf_pool_name
             if config_type == "ssl":
                 irule = "irule_ins_client_XFF"
-                snat = "automap"
                 pool_name = svc_pool_name
 
             # modify persistence
@@ -263,26 +308,48 @@ def vs_page(request):
             else:
                 modified_persistence = None
             
-            response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, modified_persistence)
-            if response is not None:
-                if response.status_code == 409:
-                    msg = f"Virtual Server {ssl_vs_name} already exists"
-                    logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
-                    errors.append(msg)
-                elif response.status_code == 200:
-                    msg = f"Virtual Server {ssl_vs_name} is created."
-                    logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
-                    success.append(msg)
+            if config_check is None:
+                response = f5_create_vs(lb_addr, username, password, ssl_vs_name, dest_ip, pool_name, profiles, irule, lb_desc, snat, modified_persistence)
+                if response is not None:
+                    if response.status_code == 409:
+                        msg = f"Virtual Server {ssl_vs_name} already exists"
+                        logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
+                        errors.append(msg)
+                    elif response.status_code == 200:
+                        msg = f"Virtual Server {ssl_vs_name} is created."
+                        logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
+                        success.append(msg)
+                    else:
+                        msg = f"Failed to create VS {ssl_vs_name}; Response Code: {response.status_code}, {response.text}"
+                        logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
+                        errors.append(msg)
                 else:
-                    msg = f"Failed to create VS {ssl_vs_name}; Response Code: {response.status_code}, {response.text}"
+                    msg = f"Unknown error for creating VS {ssl_vs_name}"
                     logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
                     errors.append(msg)
-            else:
-                msg = f"Unknown error for creating VS {ssl_vs_name}"
-                logger.info(f"{client_ip} - {username} - Creating SSL VS Response: {msg}")
-                errors.append(msg)
-            if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+                if errors:
+                    return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+            else:  # config_check
+                if config_type == "waf":
+                    commands.append(" # SSL Vserver (before Waf) Command:")
+                    commands.append(f"create ltm virtual {ssl_vs_name} {{ description {lb_desc} "\
+                                    f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                    f"persist replace-all-with {{ {modified_persistence} {{ default yes }} }} "\
+                                    f"pool {pool_name} profiles add {{ http_common {{ }} oneconnect_prefix32 {{ }} "\
+                                    f"qradar {{ }} webaccel_common {{ }} httpcompression {{ }} "\
+                                    f"tcp {{ }} {ssl_profile} {{ context clientside }} }} rules {{ irule_backup_vs }} "\
+                                    f"serverssl-use-sni disabled source 0.0.0.0/0 source-address-translation {{ type automap  }} "\
+                                    f"translate-address enabled translate-port enabled }}")
+                if config_type == "ssl":
+                    commands.append(" # SSL Vserver Command:")
+                    commands.append(f"create ltm virtual {ssl_vs_name} {{ description {lb_desc} "\
+                                    f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                    f"persist replace-all-with {{ {modified_persistence} {{ default yes }} }} "\
+                                    f"pool {pool_name} profiles add {{ http_common {{ }} oneconnect_prefix32 {{ }} "\
+                                    f"qradar {{ }} webaccel_common {{ }} httpcompression {{ }} "\
+                                    f"tcp {{ }} {ssl_profile} {{ context clientside }} }} rules {{ irule_ins_client_XFF }} "\
+                                    f"serverssl-use-sni disabled source 0.0.0.0/0 source-address-translation {{ type automap  }} "\
+                                    f"translate-address enabled translate-port enabled }}")
 
         # create http or tcp virtual server with application services backend pool
         if config_type == "http" or config_type == "tcp":
@@ -311,28 +378,54 @@ def vs_page(request):
                 profiles.append({ "name": "/Common/qradar", "context": "all" })
             if svc_proto == "ssl":
                 profiles.append({ "name": f"/Common/serverssl", "context": "serverside" })
-            response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
-            if response is not None:
-                if response.status_code == 409:
-                    msg = f"Virtual Server {nonssl_vs_name} already exists"
-                    logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
-                    errors.append(msg)
-                elif response.status_code == 200:
-                    msg = f"Virtual Server {nonssl_vs_name} is created."
-                    logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
-                    success.append(msg)
+            if config_check is None:
+                response = f5_create_vs(lb_addr, username, password, nonssl_vs_name, dest_ip, svc_pool_name, profiles, irule, lb_desc, snat, modified_persistence)
+                if response is not None:
+                    if response.status_code == 409:
+                        msg = f"Virtual Server {nonssl_vs_name} already exists"
+                        logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
+                        errors.append(msg)
+                    elif response.status_code == 200:
+                        msg = f"Virtual Server {nonssl_vs_name} is created."
+                        logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
+                        logger.info(f"{response.text}")
+                        success.append(msg)
+                    else:
+                        msg = f"Failed to create VS {nonssl_vs_name}; Response Code: {response.status_code}, {response.text}"
+                        logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
+                        errors.append(msg)
                 else:
-                    msg = f"Failed to create VS {nonssl_vs_name}; Response Code: {response.status_code}, {response.text}"
+                    msg = f"Unknown error for creating VS {nonssl_vs_name}"
                     logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
                     errors.append(msg)
-            else:
-                msg = f"Unknown error for creating VS {nonssl_vs_name}"
-                logger.info(f"{client_ip} - {username} - Creating Non-Ssl VS Response: {msg}")
-                errors.append(msg)
-            if errors:
-                return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+                if errors:
+                    return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+            else:  # config_check
+                if config_type == "http":
+                    commands.append(" # HTTP Vserver (before Waf) Command:")
+                    commands.append(f"create ltm virtual {nonssl_vs_name} {{ description {lb_desc} "\
+                                    f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                    f"persist replace-all-with {{ {modified_persistence} {{ default yes }} }} "\
+                                    f"pool {svc_pool_name} profiles add {{ http_common {{ }} oneconnect_prefix32 {{ }} "\
+                                    f"qradar {{ }} webaccel_common {{ }} httpcompression {{ }} "\
+                                    f"tcp {{ }} }} rules {{ irule_ins_client_XFF }} "\
+                                    f"serverssl-use-sni disabled source 0.0.0.0/0 source-address-translation {{ type automap  }} "\
+                                    f"translate-address enabled translate-port enabled }}")
+                if config_type == "tcp":
+                    commands.append(" # TCP Vserver Command:")
+                    commands.append(f"create ltm virtual {nonssl_vs_name} {{ description {lb_desc} "\
+                                    f"destination {dest_ip} ip-protocol tcp mask 255.255.255.255 "\
+                                    f"persist replace-all-with {{ {modified_persistence} {{ default yes }} }} "\
+                                    f"pool {svc_pool_name} profiles add {{ oneconnect_prefix32 {{ }} tcp {{ }} }} "\
+                                    f"serverssl-use-sni disabled source 0.0.0.0/0 source-address-translation {{ type automap  }} "\
+                                    f"translate-address enabled translate-port enabled }}")
         
-        return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+        if config_check is None:
+            save_result = f5_save_sys_config(lb_addr, username, password)
+            logger.info(f"{client_ip} - {username} - Saved config to {lb_addr}: {save_result}")
+            return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'load_balancers': load_balancers})
+        else:
+            return render(request, 'create_vs.html', {'errors': errors, 'success': success, 'commands': commands, 'load_balancers': load_balancers})
 
     return render(request, 'create_vs.html', {'load_balancers': load_balancers})
 

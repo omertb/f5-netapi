@@ -65,6 +65,14 @@ def f5_custom_create_vs(vs_name, vs_ip, pool_name, profiles, irule, snat="none",
     return f5_create_vs(F5_HOST, F5_USER, F5_PASS, vs_name, vs_ip, pool_name, profiles, irule, snat, persistence)
 
 
+def f5_save_sys_config(host, user, passwd):
+    save_config_url = f"https://{host}/mgmt/tm/sys/config"
+    payload = {
+            "command": "save"
+    }
+    return f5_api_request("POST", save_config_url, user, passwd, data=json.dumps(payload))
+
+
 def f5_create_pool(host, user, passwd, pool_name, members, lb_method):
     create_pool_api_url = f"https://{host}/mgmt/tm/ltm/pool"
     payload = {
